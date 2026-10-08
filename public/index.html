@@ -606,7 +606,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 <script>
 // ── Worker domain (hardcoded — altere aqui quando mudar) ──────────────────────
-const WORKER_DOMAIN = "imgreview.SEUDOMINIO.workers.dev";
+const WORKER_DOMAIN = "imggen-worker.mentorbrunoribas.workers.dev";
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let currentSlug = null;
@@ -1659,8 +1659,8 @@ function updateURLs() {
   const host = document.getElementById("vpsHost")?.value.trim() || "";
   try { localStorage.setItem("imgreview_vps_host", host); } catch(e) {}
   document.getElementById("workerUrl").textContent = `https://${WORKER_DOMAIN}/render?template=${slug}&name={{contact.first_name}}`;
-  document.getElementById("apiUrl").textContent = host ? `http://${host}:3000/render?template=${slug}&name=João` : "Configure o domínio acima";
-  document.getElementById("previewUrl").textContent = host ? `http://${host}:3000/render?template=${slug}&name=Teste` : "Configure o domínio acima";
+  document.getElementById("apiUrl").textContent = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Jo%C3%A3o`;
+  document.getElementById("previewUrl").textContent = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Teste`;
 }
 
 async function copyURL(id, btn) {
