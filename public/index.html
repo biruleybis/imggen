@@ -1104,8 +1104,8 @@ function updateURLs() {
   const host = document.getElementById("vpsHost")?.value.trim() || "";
   try { localStorage.setItem("imgreview_vps_host", host); } catch(e) {}
   document.getElementById("workerUrl").textContent  = `https://${WORKER_DOMAIN}/render?template=${slug}&name={{contact.first_name}}`;
-  document.getElementById("apiUrl").textContent     = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Andressa`;
-  document.getElementById("previewUrl").textContent = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Teste`;
+  document.getElementById("apiUrl").textContent     = `https://imggen-production-1a07.up.railway.app/render?template=${slug}&name=Andressa`;
+  document.getElementById("previewUrl").textContent = `https://imggen-production-1a07.up.railway.app/render?template=${slug}&name=Teste`;
 }
 
 async function copyURL(id, btn) {
