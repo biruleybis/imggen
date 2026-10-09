@@ -14,12 +14,34 @@ const AUTH_EMAIL_TO   = process.env.AUTH_EMAIL    || "mentorbrunoribas@gmail.com
 const AUTH_EMAIL_FROM = "ImgReview <noreply@ribasic.com.br>";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// In-memory stores (ephemeral, resets on restart — acceptable for 2FA)
-const otpStore     = new Map(); // token → { otp, expires }
+// Session store (ephemeral — restarts invalidate sessions, user just logs in again)
 const sessionStore = new Map(); // sessionId → expires
+
+const OTP_SECRET = process.env.OTP_SECRET || "imgr-secret-2024";
 
 function genToken() { return crypto.randomBytes(16).toString("hex"); }
 function genOtp()   { return String(Math.floor(100000 + Math.random() * 900000)); }
+
+// Encode OTP into a signed token so it survives server restarts (no memory needed)
+function encodeOtpToken(otp) {
+  const expires = Date.now() + 30 * 60 * 1000;
+  const payload = `${otp}:${expires}`;
+  const sig = crypto.createHmac("sha256", OTP_SECRET).update(payload).digest("hex").slice(0, 16);
+  return Buffer.from(`${payload}:${sig}`).toString("base64url");
+}
+function decodeOtpToken(token) {
+  try {
+    const raw = Buffer.from(token, "base64url").toString();
+    const parts = raw.split(":");
+    if (parts.length !== 3) return null;
+    const [otp, expires, sig] = parts;
+    const payload = `${otp}:${expires}`;
+    const expected = crypto.createHmac("sha256", OTP_SECRET).update(payload).digest("hex").slice(0, 16);
+    if (sig !== expected) return null;
+    if (Date.now() > Number(expires)) return null;
+    return otp;
+  } catch { return null; }
+}
 
 function isAuthed(req) {
   const sid = req.headers["x-session-id"] || req.query._sid;
@@ -85,8 +107,7 @@ app.post("/auth/step1", rateLimit({ windowMs: 60000, max: 10 }), async (req, res
     return res.status(401).json({ error: "Senha incorreta" });
   }
   const otp   = genOtp();
-  const token = genToken();
-  otpStore.set(token, { otp, expires: Date.now() + 30 * 60 * 1000 }); // 30 min
+  const token = encodeOtpToken(otp); // OTP baked into signed token — survives restarts
 
   try {
     await resend.emails.send({
@@ -106,16 +127,15 @@ app.post("/auth/step1", rateLimit({ windowMs: 60000, max: 10 }), async (req, res
 // Step 2: verify OTP → create session
 app.post("/auth/step2", rateLimit({ windowMs: 60000, max: 20 }), (req, res) => {
   const { token, otp } = req.body || {};
-  const entry = otpStore.get(token);
   const received = String(otp || "").replace(/\s+/g, "").trim();
-  console.log(`OTP check: token=${token?.slice(0,8)}… stored=${entry?.otp} received=${received} expired=${entry ? Date.now() > entry.expires : "no-entry"}`);
-  if (!entry || Date.now() > entry.expires) {
+  const storedOtp = decodeOtpToken(token);
+  console.log(`OTP check: stored=${storedOtp} received=${received}`);
+  if (!storedOtp) {
     return res.status(401).json({ error: "Código expirado — clique em Voltar e tente novamente" });
   }
-  if (entry.otp !== received) {
+  if (storedOtp !== received) {
     return res.status(401).json({ error: "Código incorreto" });
   }
-  otpStore.delete(token);
   const sid = genToken();
   sessionStore.set(sid, Date.now() + 8 * 60 * 60 * 1000); // 8 hours
   res.json({ sessionId: sid });
