@@ -10,6 +10,36 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const TEMPLATES_DIR = path.join(__dirname, "templates");
 
+// ── Register Google Fonts (woff2 supported by @napi-rs/canvas) ───────────────
+(function registerFonts() {
+  const fontsourceDir = path.join(__dirname, "node_modules/@fontsource");
+  const toRegister = [
+    { pkg: "great-vibes",       file: "great-vibes-latin-400-normal.woff2",             family: "Great Vibes" },
+    { pkg: "dancing-script",    file: "dancing-script-latin-700-normal.woff2",           family: "Dancing Script" },
+    { pkg: "sacramento",        file: "sacramento-latin-400-normal.woff2",               family: "Sacramento" },
+    { pkg: "satisfy",           file: "satisfy-latin-400-normal.woff2",                  family: "Satisfy" },
+    { pkg: "playfair-display",  file: "playfair-display-latin-700-normal.woff2",         family: "Playfair Display" },
+    { pkg: "playfair-display",  file: "playfair-display-latin-700-italic.woff2",         family: "Playfair Display" },
+    { pkg: "cormorant-garamond",file: "cormorant-garamond-latin-700-italic.woff2",       family: "Cormorant Garamond" },
+    { pkg: "cinzel",            file: "cinzel-latin-700-normal.woff2",                   family: "Cinzel" },
+    { pkg: "pacifico",          file: "pacifico-latin-400-normal.woff2",                 family: "Pacifico" },
+    { pkg: "josefin-sans",      file: "josefin-sans-latin-700-normal.woff2",             family: "Josefin Sans" },
+  ];
+  for (const { pkg, file, family } of toRegister) {
+    const fontPath = path.join(fontsourceDir, pkg, "files", file);
+    if (fs.existsSync(fontPath)) {
+      try {
+        GlobalFonts.register(fs.readFileSync(fontPath), family);
+      } catch (e) {
+        console.warn(`Font register failed: ${family} — ${e.message}`);
+      }
+    } else {
+      console.warn(`Font file not found: ${fontPath}`);
+    }
+  }
+  console.log(`Fonts registered. Families available: ${GlobalFonts.families.length}`);
+})();
+
 // ── Security ──────────────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: false, // disabled so the panel's inline scripts work
@@ -434,54 +464,76 @@ app.get("/render", renderLimiter, async (req, res) => {
     // Draw base photo
     ctx.drawImage(baseImage, 0, 0);
 
-    // If preset is stored, use preset renderer (may be async)
+    // If preset is stored, use V3 badge preset renderer (may be async)
     const presetFn = cfg.preset_id && PRESETS[cfg.preset_id];
     if (presetFn) {
       await presetFn(ctx, W, H, displayName);
+    } else if (cfg.font_family || cfg.text_x_pct != null) {
+      // ── New font-overlay mode (v3.0 font tool) ──────────────────────────────
+      const xPct   = cfg.text_x_pct ?? 0.5;
+      const yPct   = cfg.text_y_pct ?? 0.72;
+      const tx     = Math.round(W * xPct);
+      const ty     = Math.round(H * yPct);
+      const fs     = cfg.font_size   ?? Math.round(H * 0.09);
+      const color  = cfg.font_color  ?? "#0d1b3e";
+      const family = cfg.font_family ?? "Georgia, serif";
+      const bold   = cfg.bold   ? "bold"   : "normal";
+      const italic = cfg.italic ? "italic" : "normal";
+      const shadow = cfg.shadow ?? false;
+      const underline = cfg.underline ?? false;
+
+      // Text shadow
+      if (shadow) {
+        ctx.shadowColor   = "rgba(0,0,0,0.45)";
+        ctx.shadowBlur    = 12;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+      }
+
+      ctx.font         = `${italic} ${bold} ${fs}px ${family}`;
+      ctx.fillStyle    = color;
+      ctx.textAlign    = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(displayName, tx, ty);
+
+      // Reset shadow before underline
+      ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+
+      // Elegant curved underline
+      if (underline) {
+        const tw = ctx.measureText(displayName).width;
+        const uw = tw * 0.85;
+        const ux = tx - uw / 2;
+        const uy = ty + fs * 0.62;
+        ctx.beginPath();
+        ctx.moveTo(ux, uy);
+        ctx.quadraticCurveTo(tx, uy + fs * 0.1, ux + uw, uy);
+        ctx.strokeStyle = "#c8a882";
+        ctx.lineWidth   = Math.max(2, Math.round(fs * 0.045));
+        ctx.lineCap     = "round";
+        ctx.stroke();
+      }
     } else {
-      // Manual box render
-      const { box, text, icon } = cfg;
+      // ── Legacy manual box render (backwards compat) ────────────────────────
+      const { box, text } = cfg;
+      if (!box) throw new Error("No renderable config found (no box, no font_family, no preset_id)");
       const bx = box.x, by = box.y, bw = box.width, bh = box.height;
       const radius = box.radius ?? 12;
       const borderWidth = box.border_width ?? 0;
-      const borderColor = box.border_color ?? "#ffffff";
       const opacity = text.opacity ?? 1;
 
-      ctx.save();
-      ctx.globalAlpha = opacity;
+      ctx.save(); ctx.globalAlpha = opacity;
       roundRect(ctx, bx, by, bw, bh, radius);
-      ctx.fillStyle = text.bg_color || "#ffffff";
-      ctx.fill();
-      if (borderWidth > 0) { ctx.lineWidth = borderWidth; ctx.strokeStyle = borderColor; ctx.stroke(); }
+      ctx.fillStyle = text.bg_color || "#ffffff"; ctx.fill();
+      if (borderWidth > 0) { ctx.lineWidth = borderWidth; ctx.strokeStyle = box.border_color ?? "#fff"; ctx.stroke(); }
       ctx.restore();
 
-      // Icon
-      const iconPath = findIcon(slug);
-      let iconWidth = 0;
-      if (iconPath && icon) {
-        try {
-          const iconImg = await loadImage(iconPath);
-          const iconSize = icon.size ?? 40;
-          const iconX = bx + (icon.x ?? 10);
-          const iconY = by + (bh - iconSize) / 2;
-          ctx.drawImage(iconImg, iconX, iconY, iconSize, iconSize);
-          iconWidth = iconSize + (icon.x ?? 10) + 8;
-        } catch (e) { /* icon failed silently */ }
-      }
-
-      // Text
       const fontWeight = text.bold ? "bold" : "normal";
-      ctx.font = `${fontWeight} ${text.font_size || 40}px system-ui, -apple-system, sans-serif`;
+      ctx.font = `${fontWeight} ${text.font_size || 40}px system-ui, sans-serif`;
       ctx.fillStyle = text.font_color || "#2563EB";
-      ctx.textBaseline = "middle";
-      const textY = by + bh / 2;
-      const availableWidth = bw - iconWidth;
-      const textAreaStart = bx + iconWidth;
-      let textX;
-      if (text.align === "center") { ctx.textAlign = "center"; textX = textAreaStart + availableWidth / 2; }
-      else if (text.align === "right") { ctx.textAlign = "right"; textX = bx + bw - 16; }
-      else { ctx.textAlign = "left"; textX = textAreaStart + 16; }
-      ctx.fillText(displayName + "!", textX, textY);
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(displayName, bx + bw / 2, by + bh / 2);
     }
 
     const buffer = canvas.toBuffer("image/jpeg", { quality: 92 });

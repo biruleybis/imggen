@@ -8,11 +8,20 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/dancing-script": "^5.3.0",
+    "@fontsource/great-vibes": "^5.3.0",
+    "@fontsource/josefin-sans": "^5.3.0",
+    "@fontsource/pacifico": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/sacramento": "^5.3.0",
+    "@fontsource/satisfy": "^5.3.0",
     "@napi-rs/canvas": "^0.1.44",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5"
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
