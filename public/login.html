@@ -205,6 +205,7 @@
       const d = await r.json();
       if (!r.ok) { showError(d.error || "Erro"); return; }
       _token = d.token;
+      sessionStorage.setItem("imgr_otp_token", d.token);
       document.getElementById("step1").classList.remove("active");
       document.getElementById("step2").classList.add("active");
       showInfo("Código enviado! Verifique seu email.");
@@ -222,15 +223,18 @@
     if (otp.length < 6) return showError("Digite o código de 6 dígitos");
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Verificando...';
+    // Use sessionStorage as fallback in case _token was lost
+    const tokenToSend = _token || sessionStorage.getItem("imgr_otp_token") || "";
     try {
       const r = await fetch("/auth/step2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: _token, otp }),
+        body: JSON.stringify({ token: tokenToSend, otp }),
       });
       const d = await r.json();
       if (!r.ok) { showError(d.error || "Erro"); return; }
       localStorage.setItem("imgr_sid", d.sessionId);
+      sessionStorage.removeItem("imgr_otp_token");
       window.location.href = "/";
     } finally {
       btn.disabled = false;
