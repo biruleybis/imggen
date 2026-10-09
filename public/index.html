@@ -980,22 +980,29 @@ function loadConfig(cfg) {
   if (cfg.text_y_pct !== undefined) textYPct = cfg.text_y_pct;
 }
 
-function loadPhoto(slug) {
+async function loadPhoto(slug) {
   const img   = document.getElementById("baseImg");
   const empty = document.getElementById("emptyCanvas");
   img.style.display = "none";
   empty.style.display = "none";
-  img.src = `/template-image/${slug}?t=${Date.now()}`;
-  img.onload = () => {
-    img.style.display = "block";
-    onImgLoad();
-    // After actual load, reposition from saved percentages
-    requestAnimationFrame(() => positionOverlay());
-  };
-  img.onerror = () => {
+  try {
+    const res = await authFetch(`/template-image/${slug}?t=${Date.now()}`);
+    if (!res.ok) throw new Error("not found");
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    // revoke previous blob URL to free memory
+    if (img._blobUrl) URL.revokeObjectURL(img._blobUrl);
+    img._blobUrl = url;
+    img.onload = () => {
+      img.style.display = "block";
+      onImgLoad();
+      requestAnimationFrame(() => positionOverlay());
+    };
+    img.src = url;
+  } catch (e) {
     empty.style.display = "flex";
     img.style.display = "none";
-  };
+  }
 }
 
 // ── Photo upload ──────────────────────────────────────────────────────────────
