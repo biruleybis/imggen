@@ -620,15 +620,14 @@ let selectedPresetId = null;
 
 // ── Segments ──────────────────────────────────────────────────────────────────
 const SEGMENTS = [
-  { id: "all",         label: "Todos",       emoji: "🔍" },
-  { id: "universal",   label: "Universal",   emoji: "✨" },
-  { id: "clinica",     label: "Clínicas",    emoji: "🏥" },
-  { id: "academia",    label: "Academias",   emoji: "💪" },
-  { id: "petshop",     label: "Pet Shop",    emoji: "🐾" },
-  { id: "estetica",    label: "Estética",    emoji: "💅" },
-  { id: "juridico",    label: "Jurídico",    emoji: "⚖️" },
-  { id: "servicos",    label: "Serviços",    emoji: "🔧" },
-  { id: "restaurante", label: "Restaurante", emoji: "🍽️" },
+  { id: "all",       label: "Todos",     emoji: "🔍" },
+  { id: "universal", label: "Universal", emoji: "✨" },
+  { id: "clinica",   label: "Clínicas",  emoji: "🏥" },
+  { id: "academia",  label: "Academias", emoji: "💪" },
+  { id: "petshop",   label: "Pet Shop",  emoji: "🐾" },
+  { id: "estetica",  label: "Estética",  emoji: "💅" },
+  { id: "juridico",  label: "Jurídico",  emoji: "⚖️" },
+  { id: "servicos",  label: "Serviços",  emoji: "🔧" },
 ];
 
 let selectedSegment = "all";
@@ -660,9 +659,9 @@ function subText(ctx, text, cx, cy, fs, color) {
   ctx.fillStyle = color; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(text, cx, cy);
 }
-function starsText(ctx, cx, cy, size, color) {
+function starsRow(ctx, cx, cy, size, color) {
   ctx.font = `${size}px sans-serif`; ctx.fillStyle = color||C.gold;
-  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("★★★★★", cx, cy);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("⭐⭐⭐⭐⭐", cx, cy);
 }
 
 // ── Preset definitions ────────────────────────────────────────────────────────
@@ -675,7 +674,7 @@ const PRESETS = [
     draw(ctx, w, h, name) {
       const bh=Math.round(h*.18), by=h-bh;
       ctx.fillStyle=C.white; ctx.fillRect(0,by,w,bh);
-      starsText(ctx,w/2,by+bh*.25,Math.round(h*.04));
+      starsRow(ctx,w/2,by+bh*.25,Math.round(h*.04));
       nameText(ctx,name,w/2,by+bh*.68,Math.round(h*.07),C.blue);
     }
   },
@@ -699,7 +698,7 @@ const PRESETS = [
       ctx.save(); ctx.globalAlpha=.95; rRect(ctx,bx,by,bw,bh,16); ctx.fillStyle=C.white; ctx.fill(); ctx.restore();
       subText(ctx,"Obrigado pela visita,",w/2,by+bh*.28,Math.round(h*.038),C.gray);
       nameText(ctx,name,w/2,by+bh*.57,Math.round(h*.075),C.blue);
-      subText(ctx,"Sua opinião faz a diferença ★★★★★",w/2,by+bh*.82,Math.round(h*.033),C.gold);
+      subText(ctx,"Sua opinião faz a diferença. Avalie!",w/2,by+bh*.82,Math.round(h*.033),C.gold);
     }
   },
   {
@@ -743,7 +742,7 @@ const PRESETS = [
       ctx.save(); ctx.globalAlpha=.92; rRect(ctx,bx,by,bw,bh,10); ctx.fillStyle=C.navy; ctx.fill();
       ctx.lineWidth=2; ctx.strokeStyle=C.blue; ctx.stroke(); ctx.restore();
       nameText(ctx,name,w/2,by+bh*.38,Math.round(h*.08),C.white);
-      subText(ctx,"★★★★★  Conta pra gente!",w/2,by+bh*.75,Math.round(h*.032),"#93c5fd");
+      subText(ctx,"Conta pra gente como foi!",w/2,by+bh*.75,Math.round(h*.032),"#93c5fd");
     }
   },
   {
@@ -753,7 +752,7 @@ const PRESETS = [
     draw(ctx, w, h, name) {
       const bw=Math.round(w*.18); ctx.fillStyle=C.blue; ctx.fillRect(0,0,bw,h);
       ctx.save(); ctx.translate(bw/2,h/2); ctx.rotate(-Math.PI/2);
-      subText(ctx,name+" ★★★★★",0,0,Math.round(h*.054),C.white);
+      subText(ctx,name+" — Avalie!",0,0,Math.round(h*.054),C.white);
       ctx.restore();
     }
   },
@@ -769,7 +768,7 @@ const PRESETS = [
       ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
       subText(ctx,"Obrigado por confiar em nossa equipe,",w/2,by+bh*.32,Math.round(h*.036),C.white);
       nameText(ctx,name,w/2,by+bh*.65,Math.round(h*.075),C.white);
-      subText(ctx,"Deixe sua avaliação ★★★★★",w/2,by+bh*.88,Math.round(h*.03),"#99f6e4");
+      subText(ctx,"Deixe sua avaliação ⭐",w/2,by+bh*.88,Math.round(h*.03),"#99f6e4");
     }
   },
   {
@@ -807,7 +806,7 @@ const PRESETS = [
       ctx.lineWidth=2; ctx.strokeStyle=C.teal; ctx.stroke(); ctx.restore();
       subText(ctx,"Sua consulta foi concluída,",w/2,by+bh*.25,Math.round(h*.035),C.gray);
       nameText(ctx,name,w/2,by+bh*.56,Math.round(h*.075),C.teal);
-      subText(ctx,"Avalie nosso atendimento ★★★★★",w/2,by+bh*.82,Math.round(h*.032),C.gold);
+      subText(ctx,"Avalie nosso atendimento ⭐",w/2,by+bh*.82,Math.round(h*.032),C.gold);
     }
   },
   {
@@ -817,7 +816,7 @@ const PRESETS = [
     draw(ctx, w, h, name) {
       const bh=h*.2,by=h-bh; ctx.fillStyle=C.teal; ctx.fillRect(0,by,w,bh);
       nameText(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),C.white);
-      subText(ctx,"você merece os melhores cuidados ★★★★★",w/2,by+bh*.72,Math.round(h*.032),"#99f6e4");
+      subText(ctx,"Como foi seu atendimento? Avalie! ⭐",w/2,by+bh*.72,Math.round(h*.032),"#99f6e4");
     }
   },
   // ─── ACADEMIAS ────────────────────────────────────────────────────────────────
@@ -832,7 +831,7 @@ const PRESETS = [
       ctx.lineWidth=2; ctx.strokeStyle="#facc15"; ctx.stroke();
       nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#facc15");
       subText(ctx,"Você é parte da nossa família! 💪",w/2,by+bh*.68,Math.round(h*.034),C.white);
-      subText(ctx,"Avalie nossa academia ★★★★★",w/2,by+bh*.88,Math.round(h*.028),"#facc15");
+      subText(ctx,"Avalie nossa academia ⭐",w/2,by+bh*.88,Math.round(h*.028),"#facc15");
     }
   },
   {
@@ -867,7 +866,7 @@ const PRESETS = [
     fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.052),font_color:"#fff",bg_color:"#dc2626",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
       const bh=Math.round(h*.17); ctx.fillStyle="#dc2626"; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" — Sua opinião nos faz mais fortes! ★★★★★",w/2,bh/2,Math.round(h*.052),C.white);
+      subText(ctx,name+" — Sua opinião nos faz crescer!",w/2,bh/2,Math.round(h*.052),C.white);
     }
   },
   {
@@ -891,7 +890,7 @@ const PRESETS = [
       const bh=h*.22,by=h-bh; ctx.fillStyle="#f472b6"; ctx.fillRect(0,by,w,bh);
       subText(ctx,"Obrigado por cuidar tão bem do seu pet,",w/2,by+bh*.28,Math.round(h*.035),C.white);
       nameText(ctx,name,w/2,by+bh*.6,Math.round(h*.072),C.white);
-      subText(ctx,"🐾 Deixe sua avaliação ★★★★★",w/2,by+bh*.87,Math.round(h*.03),"#fce7f3");
+      subText(ctx,"🐾 Deixe sua avaliação ⭐",w/2,by+bh*.87,Math.round(h*.03),"#fce7f3");
     }
   },
   {
@@ -916,7 +915,7 @@ const PRESETS = [
       const grd=ctx.createLinearGradient(0,0,w,0);
       grd.addColorStop(0,"#db2777"); grd.addColorStop(1,"#9333ea");
       ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" 🐾 — Obrigado por fazer parte da nossa família!",w/2,bh/2,Math.round(h*.048),C.white);
+      subText(ctx,name+" 🐾 — Obrigado por fazer parte da família!",w/2,bh/2,Math.round(h*.048),C.white);
     }
   },
   {
@@ -929,7 +928,7 @@ const PRESETS = [
       ctx.lineWidth=2; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
       subText(ctx,"Banho & Tosa concluído! ✂️",w/2,by+bh*.27,Math.round(h*.038),C.gray);
       nameText(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#db2777");
-      subText(ctx,"Como foi o serviço? Avalie ★★★★★",w/2,by+bh*.84,Math.round(h*.032),C.gold);
+      subText(ctx,"Como foi o serviço? Avalie ⭐",w/2,by+bh*.84,Math.round(h*.032),C.gold);
     }
   },
   {
@@ -939,7 +938,7 @@ const PRESETS = [
     draw(ctx, w, h, name) {
       const bh=h*.2,by=h-bh; ctx.fillStyle="#7e22ce"; ctx.fillRect(0,by,w,bh);
       nameText(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),C.white);
-      subText(ctx,"seu pet tem os melhores cuidados 🐾 ★★★★★",w/2,by+bh*.72,Math.round(h*.03),"#e9d5ff");
+      subText(ctx,"Conte como foi o cuidado do seu pet 🐾",w/2,by+bh*.72,Math.round(h*.03),"#e9d5ff");
     }
   },
   // ─── ESTÉTICA ─────────────────────────────────────────────────────────────────
@@ -954,7 +953,7 @@ const PRESETS = [
       ctx.lineWidth=1; ctx.strokeStyle="#d97706"; ctx.stroke(); ctx.restore();
       nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#fde68a");
       subText(ctx,"você merece todo esse brilho ✨",w/2,by+bh*.66,Math.round(h*.036),C.white);
-      subText(ctx,"Avalie nossa experiência ★★★★★",w/2,by+bh*.88,Math.round(h*.028),"#d97706");
+      subText(ctx,"Avalie nossa experiência ⭐",w/2,by+bh*.88,Math.round(h*.028),"#d97706");
     }
   },
   {
@@ -968,7 +967,7 @@ const PRESETS = [
       ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
       subText(ctx,"Como foi sua experiência conosco,",w/2,by+bh*.3,Math.round(h*.036),C.white);
       nameText(ctx,name,w/2,by+bh*.62,Math.round(h*.072),C.white);
-      subText(ctx,"Deixe seu feedback ★★★★★",w/2,by+bh*.88,Math.round(h*.03),"#fce7f3");
+      subText(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.88,Math.round(h*.03),"#fce7f3");
     }
   },
   {
@@ -1046,7 +1045,7 @@ const PRESETS = [
       ctx.fillText("🧠",w/2,by+bh*.23);
       subText(ctx,"Obrigado pela sessão,",w/2,by+bh*.5,Math.round(h*.036),C.gray);
       nameText(ctx,name,w/2,by+bh*.73,Math.round(h*.068),"#7c3aed");
-      subText(ctx,"Deixe seu feedback ★★★★★",w/2,by+bh*.91,Math.round(h*.028),C.gold);
+      subText(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.91,Math.round(h*.028),C.gold);
     }
   },
   {
@@ -1079,7 +1078,7 @@ const PRESETS = [
       const bh=h*.22,by=h-bh; ctx.fillStyle=C.green; ctx.fillRect(0,by,w,bh);
       subText(ctx,"✅ Serviço concluído com sucesso,",w/2,by+bh*.28,Math.round(h*.036),C.white);
       nameText(ctx,name,w/2,by+bh*.6,Math.round(h*.072),C.white);
-      subText(ctx,"Como avalia nosso trabalho? ★★★★★",w/2,by+bh*.87,Math.round(h*.03),"#bbf7d0");
+      subText(ctx,"Como avalia nosso trabalho? ⭐",w/2,by+bh*.87,Math.round(h*.03),"#bbf7d0");
     }
   },
   {
@@ -1101,7 +1100,7 @@ const PRESETS = [
     fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.052),font_color:"#fff",bg_color:C.green,bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
       const bh=Math.round(h*.17); ctx.fillStyle=C.green; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" 🔧 — Serviço feito com qualidade para você!",w/2,bh/2,Math.round(h*.052),C.white);
+      subText(ctx,name+" — Serviço de qualidade ✔",w/2,bh/2,Math.round(h*.052),C.white);
     }
   },
   {
@@ -1126,69 +1125,9 @@ const PRESETS = [
       ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#052e16"; ctx.fill();
       ctx.lineWidth=2; ctx.strokeStyle="#4ade80"; ctx.stroke(); ctx.restore();
       nameText(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#4ade80");
-      subText(ctx,"👷 Feito por profissionais. Avalie ★★★★★",w/2,by+bh*.73,Math.round(h*.032),C.white);
+      subText(ctx,"👷 Feito por profissionais. Avalie ⭐",w/2,by+bh*.73,Math.round(h*.032),C.white);
     }
   },
-  // ─── RESTAURANTE ──────────────────────────────────────────────────────────────
-  {
-    id: "rs-sabor", label: "Sabor", emoji: "🍽️", segment: "restaurante",
-    description: "Gradiente âmbar na base — experiência gastronômica",
-    fn(w,h){ const bh=h*.22,by=h-bh; return { box:{x:0,y:by,width:w,height:bh,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.073),font_color:"#fff",bg_color:"#b45309",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.22,by=h-bh;
-      const grd=ctx.createLinearGradient(0,by,0,h);
-      grd.addColorStop(0,"rgba(180,83,9,0)"); grd.addColorStop(1,"rgba(180,83,9,.92)");
-      ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-      subText(ctx,"Obrigado por nos visitar,",w/2,by+bh*.28,Math.round(h*.036),C.white);
-      nameText(ctx,name,w/2,by+bh*.6,Math.round(h*.073),C.white);
-      subText(ctx,"🍽️ Como foi a experiência? ★★★★★",w/2,by+bh*.87,Math.round(h*.03),"#fed7aa");
-    }
-  },
-  {
-    id: "rs-gostoso", label: "Gostoso Assim", emoji: "😋", segment: "restaurante",
-    description: "Card creme com emoji 😋 — avaliação da refeição",
-    fn(w,h){ const bw=w*.78,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:18,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.073),font_color:C.amber,bg_color:"#fff7ed",bold:true,align:"center",opacity:.95} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      ctx.save(); ctx.globalAlpha=.95; rRect(ctx,bx,by,bw,bh,18); ctx.fillStyle="#fff7ed"; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.07)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("😋",w/2,by+bh*.24);
-      nameText(ctx,name,w/2,by+bh*.55,Math.round(h*.073),C.amber);
-      subText(ctx,"Conte como foi sua refeição! ★★★★★",w/2,by+bh*.82,Math.round(h*.032),C.gray);
-    }
-  },
-  {
-    id: "rs-voltemos", label: "Até Breve", emoji: "🤗", segment: "restaurante",
-    description: "Banner topo âmbar — até a próxima visita",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.05),font_color:"#fff",bg_color:"#b45309",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.17); ctx.fillStyle="#b45309"; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" — Até a próxima! 🍽️ Avalie sua experiência",w/2,bh/2,Math.round(h*.05),C.white);
-    }
-  },
-  {
-    id: "rs-delivery", label: "Delivery", emoji: "🛵", segment: "restaurante",
-    description: "Card creme com borda laranja — pedido chegou!",
-    fn(w,h){ const bw=w*.74,bh=h*.25; return { box:{x:(w-bw)/2,y:h*.38,width:bw,height:bh,radius:12,border_width:2,border_color:"#f97316"}, text:{font_size:Math.round(h*.075),font_color:"#c2410c",bg_color:"#fff7ed",bold:true,align:"center",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.74,bh=h*.25,bx=(w-bw)/2,by=h*.38;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,12); ctx.fillStyle="#fff7ed"; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle="#f97316"; ctx.stroke(); ctx.restore();
-      subText(ctx,"🛵 Seu pedido chegou,",w/2,by+bh*.27,Math.round(h*.038),C.gray);
-      nameText(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#c2410c");
-      subText(ctx,"Como foi a entrega? Avalie ★★★★★",w/2,by+bh*.84,Math.round(h*.032),C.gold);
-    }
-  },
-  {
-    id: "rs-fidelidade", label: "Fidelidade", emoji: "❤️", segment: "restaurante",
-    description: "Rodapé vinho — cliente fiel e especial",
-    fn(w,h){ return { box:{x:0,y:h*.8,width:w,height:h*.2,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.058),font_color:"#fff",bg_color:"#7f1d1d",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.2,by=h-bh; ctx.fillStyle="#7f1d1d"; ctx.fillRect(0,by,w,bh);
-      nameText(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),C.white);
-      subText(ctx,"obrigado por ser nosso cliente fiel ❤️ ★★★★★",w/2,by+bh*.72,Math.round(h*.03),"#fecaca");
-    }
-  }
 ];
 
 function loadVpsHost() {
@@ -1444,7 +1383,11 @@ const overlay = document.getElementById("boxOverlay");
 
 overlay.addEventListener("mousedown", e => {
   if (e.target.classList.contains("resize-se") || e.target.classList.contains("resize-e")) return;
-  isDragging = true; dragOffX = e.clientX - overlay.offsetLeft; dragOffY = e.clientY - overlay.offsetTop;
+  isDragging = true;
+  const wrap = document.getElementById("canvasWrap");
+  const wrapRect = wrap.getBoundingClientRect();
+  dragOffX = e.clientX - wrapRect.left - overlay.offsetLeft;
+  dragOffY = e.clientY - wrapRect.top - overlay.offsetTop;
   e.preventDefault();
 });
 document.getElementById("resizeSE").addEventListener("mousedown", e => {
@@ -1459,8 +1402,10 @@ document.getElementById("resizeE").addEventListener("mousedown", e => {
 
 document.addEventListener("mousemove", e => {
   if (isDragging) {
-    let nx = Math.max(0, Math.min(e.clientX - dragOffX, imgDisplayW - overlay.offsetWidth));
-    let ny = Math.max(0, Math.min(e.clientY - dragOffY, imgDisplayH - overlay.offsetHeight));
+    const wrap = document.getElementById("canvasWrap");
+    const wrapRect = wrap.getBoundingClientRect();
+    let nx = Math.max(0, Math.min(e.clientX - wrapRect.left - dragOffX, imgDisplayW - overlay.offsetWidth));
+    let ny = Math.max(0, Math.min(e.clientY - wrapRect.top - dragOffY, imgDisplayH - overlay.offsetHeight));
     overlay.style.left = nx + "px"; overlay.style.top = ny + "px";
     syncPropsFromOverlay(); drawBoxPreview();
   }

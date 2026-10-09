@@ -226,12 +226,12 @@ const C = {
   amber:"#d97706",red:"#dc2626",sky:"#0284c7",warm:"#92400e",
 };
 function sName(ctx, name, cx, cy, fs, color) {
-  ctx.font = `bold ${fs}px sans-serif`; ctx.fillStyle = color;
+  ctx.font = `bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle = color;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(name + "!", cx, cy);
 }
 function sSub(ctx, text, cx, cy, fs, color) {
-  ctx.font = `500 ${fs}px sans-serif`; ctx.fillStyle = color;
+  ctx.font = `500 ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle = color;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(text, cx, cy);
 }
@@ -242,8 +242,8 @@ const PRESETS = {
   "u-rodape-clean": (ctx,w,h,name) => {
     const bh=Math.round(h*.18),by=h-bh;
     ctx.fillStyle="#fff"; ctx.fillRect(0,by,w,bh);
-    ctx.font=`${Math.round(h*.04)}px sans-serif`; ctx.fillStyle="#f59e0b";
-    ctx.textAlign="center"; ctx.textBaseline="top"; ctx.fillText("★★★★★",w/2,by+bh*.1);
+    ctx.font=`${Math.round(h*.04)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#f59e0b";
+    ctx.textAlign="center"; ctx.textBaseline="top"; ctx.fillText("⭐⭐⭐⭐⭐",w/2,by+bh*.1);
     sName(ctx,name,w/2,by+bh*.68,Math.round(h*.07),C.blue);
   },
   "u-pill-center": (ctx,w,h,name) => {
@@ -257,7 +257,7 @@ const PRESETS = {
     ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,16); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
     sSub(ctx,"Obrigado pela visita,",w/2,by+bh*.28,Math.round(h*.038),C.gray);
     sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),C.blue);
-    sSub(ctx,"Sua opiniao faz a diferenca ★★★★★",w/2,by+bh*.82,Math.round(h*.033),C.gold);
+    sSub(ctx,"Sua opiniao faz a diferenca! Avalie ⭐",w/2,by+bh*.82,Math.round(h*.033),C.gold);
   },
   "u-assinatura": (ctx,w,h,name) => {
     const bw=w*.44,bh=h*.115,bx=w-bw-w*.04,by=h-bh-h*.05;
@@ -281,12 +281,12 @@ const PRESETS = {
     ctx.save(); ctx.globalAlpha=.92; roundRect(ctx,bx,by,bw,bh,10); ctx.fillStyle=C.navy; ctx.fill();
     ctx.lineWidth=2; ctx.strokeStyle=C.blue; ctx.stroke(); ctx.restore();
     sName(ctx,name,w/2,by+bh*.38,Math.round(h*.08),"#fff");
-    sSub(ctx,"★★★★★  Conta pra gente!",w/2,by+bh*.75,Math.round(h*.032),"#93c5fd");
+    sSub(ctx,"Conta pra gente como foi!",w/2,by+bh*.75,Math.round(h*.032),"#93c5fd");
   },
   "u-badge-lat": (ctx,w,h,name) => {
     const bw=Math.round(w*.18); ctx.fillStyle=C.blue; ctx.fillRect(0,0,bw,h);
     ctx.save(); ctx.translate(bw/2,h/2); ctx.rotate(-Math.PI/2);
-    sSub(ctx,name+" ★★★★★",0,0,Math.round(h*.054),"#fff"); ctx.restore();
+    sSub(ctx,name+" — Avalie!",0,0,Math.round(h*.054),"#fff"); ctx.restore();
   },
   // CLÍNICAS
   "cl-confianca": (ctx,w,h,name) => {
@@ -296,12 +296,12 @@ const PRESETS = {
     ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
     sSub(ctx,"Obrigado por confiar em nossa equipe,",w/2,by+bh*.32,Math.round(h*.036),"#fff");
     sName(ctx,name,w/2,by+bh*.65,Math.round(h*.075),"#fff");
-    sSub(ctx,"Deixe sua avaliacao ★★★★★",w/2,by+bh*.88,Math.round(h*.03),"#99f6e4");
+    sSub(ctx,"Deixe sua avaliacao ⭐",w/2,by+bh*.88,Math.round(h*.03),"#99f6e4");
   },
   "cl-saude": (ctx,w,h,name) => {
     const bw=w*.8,bh=h*.3,bx=(w-bw)/2,by=h*.33;
     ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,18); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.07)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font=`${Math.round(h*.07)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("🏥",w/2,by+bh*.25);
     sName(ctx,name,w/2,by+bh*.55,Math.round(h*.07),C.teal);
     sSub(ctx,"Como foi sua consulta? Avalie!",w/2,by+bh*.82,Math.round(h*.033),C.gray);
@@ -319,12 +319,12 @@ const PRESETS = {
     ctx.lineWidth=2; ctx.strokeStyle=C.teal; ctx.stroke(); ctx.restore();
     sSub(ctx,"Sua consulta foi concluida,",w/2,by+bh*.25,Math.round(h*.035),C.gray);
     sName(ctx,name,w/2,by+bh*.56,Math.round(h*.075),C.teal);
-    sSub(ctx,"Avalie nosso atendimento ★★★★★",w/2,by+bh*.82,Math.round(h*.032),C.gold);
+    sSub(ctx,"Avalie nosso atendimento ⭐",w/2,by+bh*.82,Math.round(h*.032),C.gold);
   },
   "cl-estrelas": (ctx,w,h,name) => {
     const bh=h*.2,by=h-bh; ctx.fillStyle=C.teal; ctx.fillRect(0,by,w,bh);
     sName(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),"#fff");
-    sSub(ctx,"voce merece os melhores cuidados ★★★★★",w/2,by+bh*.72,Math.round(h*.032),"#99f6e4");
+    sSub(ctx,"Como foi o seu atendimento? Avalie!",w/2,by+bh*.72,Math.round(h*.032),"#99f6e4");
   },
   // ACADEMIAS
   "ac-conquista": (ctx,w,h,name) => {
@@ -334,7 +334,7 @@ const PRESETS = {
     ctx.lineWidth=2; ctx.strokeStyle="#facc15"; ctx.stroke();
     sName(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#facc15");
     sSub(ctx,"Voce e parte da nossa familia! 💪",w/2,by+bh*.68,Math.round(h*.034),"#fff");
-    sSub(ctx,"Avalie nossa academia ★★★★★",w/2,by+bh*.88,Math.round(h*.028),"#facc15");
+    sSub(ctx,"Avalie nossa academia ⭐",w/2,by+bh*.88,Math.round(h*.028),"#facc15");
   },
   "ac-energia": (ctx,w,h,name) => {
     const bh=Math.round(h*.18),by=h-bh;
@@ -347,14 +347,14 @@ const PRESETS = {
   "ac-evolucao": (ctx,w,h,name) => {
     const bw=w*.78,bh=h*.26,bx=(w-bw)/2,by=h*.37;
     ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.065)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font=`${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("💪",w/2,by+bh*.25);
     sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#facc15");
     sSub(ctx,"Avalie nossa evolucao juntos!",w/2,by+bh*.84,Math.round(h*.03),"#9ca3af");
   },
   "ac-familia": (ctx,w,h,name) => {
     const bh=Math.round(h*.17); ctx.fillStyle="#dc2626"; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" — Sua opiniao nos faz mais fortes! ★★★★★",w/2,bh/2,Math.round(h*.052),"#fff");
+    sSub(ctx,name+" — Sua opiniao nos faz mais fortes!",w/2,bh/2,Math.round(h*.052),"#fff");
   },
   "ac-resultado": (ctx,w,h,name) => {
     const bw=w*.68,bh=h*.22,bx=(w-bw)/2,by=h*.76;
@@ -368,22 +368,22 @@ const PRESETS = {
     const bh=h*.22,by=h-bh; ctx.fillStyle="#f472b6"; ctx.fillRect(0,by,w,bh);
     sSub(ctx,"Obrigado por cuidar tao bem do seu pet,",w/2,by+bh*.28,Math.round(h*.035),"#fff");
     sName(ctx,name,w/2,by+bh*.6,Math.round(h*.072),"#fff");
-    sSub(ctx,"🐾 Deixe sua avaliacao ★★★★★",w/2,by+bh*.87,Math.round(h*.03),"#fce7f3");
+    sSub(ctx,"🐾 Deixe sua avaliacao ⭐",w/2,by+bh*.87,Math.round(h*.03),"#fce7f3");
   },
   "pt-cuidado": (ctx,w,h,name) => {
     const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
     ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,20); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.07)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font=`${Math.round(h*.07)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("🐾",w/2,by+bh*.24);
     sName(ctx,name,w/2,by+bh*.55,Math.round(h*.072),"#db2777");
-    sSub(ctx,"Seu pet merece o melhor! Avalie-nos ⭐",w/2,by+bh*.82,Math.round(h*.03),C.gray);
+    sSub(ctx,"Como foi o atendimento do seu pet? Avalie!",w/2,by+bh*.82,Math.round(h*.03),C.gray);
   },
   "pt-familia": (ctx,w,h,name) => {
     const bh=Math.round(h*.17);
     const grd=ctx.createLinearGradient(0,0,w,0);
     grd.addColorStop(0,"#db2777"); grd.addColorStop(1,"#9333ea");
     ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" 🐾 — Obrigado por fazer parte da nossa familia!",w/2,bh/2,Math.round(h*.048),"#fff");
+    sSub(ctx,name+" 🐾 — Obrigado por fazer parte da familia!",w/2,bh/2,Math.round(h*.048),"#fff");
   },
   "pt-servico": (ctx,w,h,name) => {
     const bw=w*.74,bh=h*.25,bx=(w-bw)/2,by=h*.38;
@@ -391,12 +391,12 @@ const PRESETS = {
     ctx.lineWidth=2; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
     sSub(ctx,"Banho & Tosa concluido! ✂️",w/2,by+bh*.27,Math.round(h*.038),C.gray);
     sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#db2777");
-    sSub(ctx,"Como foi o servico? Avalie ★★★★★",w/2,by+bh*.84,Math.round(h*.032),C.gold);
+    sSub(ctx,"Como foi o servico? Avalie ⭐",w/2,by+bh*.84,Math.round(h*.032),C.gold);
   },
   "pt-melhor": (ctx,w,h,name) => {
     const bh=h*.2,by=h-bh; ctx.fillStyle="#7e22ce"; ctx.fillRect(0,by,w,bh);
     sName(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),"#fff");
-    sSub(ctx,"seu pet tem os melhores cuidados 🐾 ★★★★★",w/2,by+bh*.72,Math.round(h*.03),"#e9d5ff");
+    sSub(ctx,"Conte como foi o cuidado do seu pet 🐾",w/2,by+bh*.72,Math.round(h*.03),"#e9d5ff");
   },
   // ESTÉTICA
   "es-brilho": (ctx,w,h,name) => {
@@ -405,8 +405,8 @@ const PRESETS = {
     ctx.save(); ctx.globalAlpha=.92; roundRect(ctx,bx,by,bw,bh,16); ctx.fillStyle="#1c0a0a"; ctx.fill();
     ctx.lineWidth=1; ctx.strokeStyle="#d97706"; ctx.stroke(); ctx.restore();
     sName(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#fde68a");
-    sSub(ctx,"voce merece todo esse brilho ✨",w/2,by+bh*.66,Math.round(h*.036),"#fff");
-    sSub(ctx,"Avalie nossa experiencia ★★★★★",w/2,by+bh*.88,Math.round(h*.028),"#d97706");
+    sSub(ctx,"Como foi sua experiencia conosco? ✨",w/2,by+bh*.66,Math.round(h*.036),"#fff");
+    sSub(ctx,"Avalie e deixe seu feedback",w/2,by+bh*.88,Math.round(h*.028),"#d97706");
   },
   "es-experiencia": (ctx,w,h,name) => {
     const bh=h*.22,by=h-bh;
@@ -415,12 +415,12 @@ const PRESETS = {
     ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
     sSub(ctx,"Como foi sua experiencia conosco,",w/2,by+bh*.3,Math.round(h*.036),"#fff");
     sName(ctx,name,w/2,by+bh*.62,Math.round(h*.072),"#fff");
-    sSub(ctx,"Deixe seu feedback ★★★★★",w/2,by+bh*.88,Math.round(h*.03),"#fce7f3");
+    sSub(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.88,Math.round(h*.03),"#fce7f3");
   },
   "es-exclusivo": (ctx,w,h,name) => {
     const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
     ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,20); ctx.fillStyle="#fff7ed"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.065)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font=`${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("👑",w/2,by+bh*.24);
     sName(ctx,name,w/2,by+bh*.55,Math.round(h*.072),"#92400e");
     sSub(ctx,"tratamento de excelencia para voce!",w/2,by+bh*.82,Math.round(h*.032),C.amber);
@@ -430,14 +430,14 @@ const PRESETS = {
     const grd=ctx.createLinearGradient(0,0,w,0);
     grd.addColorStop(0,"#7c3aed"); grd.addColorStop(1,"#db2777");
     ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" 🧘 — Como foi seu momento de relaxamento?",w/2,bh/2,Math.round(h*.046),"#fff");
+    sSub(ctx,name+" 🧘 — Como foi seu momento?",w/2,bh/2,Math.round(h*.052),"#fff");
   },
   "es-autocuidado": (ctx,w,h,name) => {
     const bw=w*.72,bh=h*.22,bx=(w-bw)/2,by=h*.76;
     ctx.save(); ctx.globalAlpha=.97; roundRect(ctx,bx,by,bw,bh,12); ctx.fillStyle="#fff0f6"; ctx.fill();
     ctx.lineWidth=1.5; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
     sName(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#be185d");
-    sSub(ctx,"🌸 Autocuidado que voce merece. Avalie!",w/2,by+bh*.73,Math.round(h*.033),"#db2777");
+    sSub(ctx,"🌸 Conte como foi sua experiencia. Avalie!",w/2,by+bh*.73,Math.round(h*.033),"#db2777");
   },
   // JURÍDICO
   "ju-confianca": (ctx,w,h,name) => {
@@ -459,11 +459,11 @@ const PRESETS = {
   "ju-sessao": (ctx,w,h,name) => {
     const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
     ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.062)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font=`${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("🧠",w/2,by+bh*.23);
     sSub(ctx,"Obrigado pela sessao,",w/2,by+bh*.5,Math.round(h*.036),C.gray);
     sName(ctx,name,w/2,by+bh*.73,Math.round(h*.068),"#7c3aed");
-    sSub(ctx,"Deixe seu feedback ★★★★★",w/2,by+bh*.91,Math.round(h*.028),C.gold);
+    sSub(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.91,Math.round(h*.028),C.gold);
   },
   "ju-elegante": (ctx,w,h,name) => {
     const bh=Math.round(h*.15); ctx.fillStyle="#1e293b"; ctx.fillRect(0,0,w,bh);
@@ -481,19 +481,19 @@ const PRESETS = {
     const bh=h*.22,by=h-bh; ctx.fillStyle=C.green; ctx.fillRect(0,by,w,bh);
     sSub(ctx,"✅ Servico concluido com sucesso,",w/2,by+bh*.28,Math.round(h*.036),"#fff");
     sName(ctx,name,w/2,by+bh*.6,Math.round(h*.072),"#fff");
-    sSub(ctx,"Como avalia nosso trabalho? ★★★★★",w/2,by+bh*.87,Math.round(h*.03),"#bbf7d0");
+    sSub(ctx,"Como avalia nosso trabalho? ⭐",w/2,by+bh*.87,Math.round(h*.03),"#bbf7d0");
   },
   "sv-seguranca": (ctx,w,h,name) => {
     const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
     ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.065)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font=`${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("🛡️",w/2,by+bh*.24);
     sName(ctx,name,w/2,by+bh*.54,Math.round(h*.073),C.green);
     sSub(ctx,"Sua casa protegida. Avalie nosso servico!",w/2,by+bh*.82,Math.round(h*.032),C.gray);
   },
   "sv-qualidade": (ctx,w,h,name) => {
     const bh=Math.round(h*.17); ctx.fillStyle=C.green; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" 🔧 — Servico feito com qualidade para voce!",w/2,bh/2,Math.round(h*.052),"#fff");
+    sSub(ctx,name+" 🔧 — Servico de qualidade ✔",w/2,bh/2,Math.round(h*.052),"#fff");
   },
   "sv-alivio": (ctx,w,h,name) => {
     ctx.fillStyle="rgba(0,0,0,.45)"; ctx.fillRect(0,0,w,h);
@@ -508,42 +508,7 @@ const PRESETS = {
     ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#052e16"; ctx.fill();
     ctx.lineWidth=2; ctx.strokeStyle="#4ade80"; ctx.stroke(); ctx.restore();
     sName(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#4ade80");
-    sSub(ctx,"👷 Feito por profissionais. Avalie ★★★★★",w/2,by+bh*.73,Math.round(h*.032),"#fff");
-  },
-  // RESTAURANTE
-  "rs-sabor": (ctx,w,h,name) => {
-    const bh=h*.22,by=h-bh;
-    const grd=ctx.createLinearGradient(0,by,0,h);
-    grd.addColorStop(0,"rgba(180,83,9,0)"); grd.addColorStop(1,"rgba(180,83,9,.92)");
-    ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-    sSub(ctx,"Obrigado por nos visitar,",w/2,by+bh*.28,Math.round(h*.036),"#fff");
-    sName(ctx,name,w/2,by+bh*.6,Math.round(h*.073),"#fff");
-    sSub(ctx,"🍽️ Como foi a experiencia? ★★★★★",w/2,by+bh*.87,Math.round(h*.03),"#fed7aa");
-  },
-  "rs-gostoso": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,18); ctx.fillStyle="#fff7ed"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.07)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("😋",w/2,by+bh*.24);
-    sName(ctx,name,w/2,by+bh*.55,Math.round(h*.073),C.amber);
-    sSub(ctx,"Conte como foi sua refeicao! ★★★★★",w/2,by+bh*.82,Math.round(h*.032),C.gray);
-  },
-  "rs-voltemos": (ctx,w,h,name) => {
-    const bh=Math.round(h*.17); ctx.fillStyle="#b45309"; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" — Ate a proxima! 🍽️ Avalie sua experiencia",w/2,bh/2,Math.round(h*.05),"#fff");
-  },
-  "rs-delivery": (ctx,w,h,name) => {
-    const bw=w*.74,bh=h*.25,bx=(w-bw)/2,by=h*.38;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,12); ctx.fillStyle="#fff7ed"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle="#f97316"; ctx.stroke(); ctx.restore();
-    sSub(ctx,"🛵 Seu pedido chegou,",w/2,by+bh*.27,Math.round(h*.038),C.gray);
-    sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#c2410c");
-    sSub(ctx,"Como foi a entrega? Avalie ★★★★★",w/2,by+bh*.84,Math.round(h*.032),C.gold);
-  },
-  "rs-fidelidade": (ctx,w,h,name) => {
-    const bh=h*.2,by=h-bh; ctx.fillStyle="#7f1d1d"; ctx.fillRect(0,by,w,bh);
-    sName(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),"#fff");
-    sSub(ctx,"obrigado por ser nosso cliente fiel ❤️ ★★★★★",w/2,by+bh*.72,Math.round(h*.03),"#fecaca");
+    sSub(ctx,"👷 Feito por profissionais. Avalie ⭐",w/2,by+bh*.73,Math.round(h*.032),"#fff");
   },
 };
 
@@ -607,7 +572,7 @@ app.get("/render", renderLimiter, async (req, res) => {
 
       // Text
       const fontWeight = text.bold ? "bold" : "normal";
-      ctx.font = `${fontWeight} ${text.font_size || 40}px sans-serif`;
+      ctx.font = `${fontWeight} ${text.font_size || 40}px system-ui, -apple-system, sans-serif`;
       ctx.fillStyle = text.font_color || "#2563EB";
       ctx.textBaseline = "middle";
       const textY = by + bh / 2;
