@@ -19,12 +19,12 @@ async function connectMongo() {
     return;
   }
   try {
+    const uri = MONGO_URI.startsWith("mongodb+srv") ? MONGO_URI : MONGO_URI;
     const client = new MongoClient(MONGO_URI, {
       serverSelectionTimeoutMS: 15000,
       connectTimeoutMS: 15000,
       socketTimeoutMS: 30000,
-      tls: true,
-      tlsInsecure: true,
+      tls: MONGO_URI.startsWith("mongodb+srv"),
     });
     await client.connect();
     db = client.db("imggen");
