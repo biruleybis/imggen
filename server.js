@@ -166,16 +166,25 @@ app.get("/api/templates/:slug", (req, res) => {
 app.post("/api/templates/:slug/photo", upload.single("photo"), (req, res) => {
   const { slug } = req.params;
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  // Read the uploaded file and save as base64 in config so it survives server restarts
+  const fileBuffer = fs.readFileSync(req.file.path);
+  const mime = req.file.mimetype || "image/jpeg";
+  const photoBase64 = `data:${mime};base64,${fileBuffer.toString("base64")}`;
+
   // Ensure config exists
-  if (!fs.existsSync(configPath(slug))) {
-    writeConfig(slug, {
+  let cfg = readConfig(slug);
+  if (!cfg) {
+    cfg = {
       slug,
       label: slug,
-      box: { x: 50, y: 50, width: 300, height: 80, radius: 12, border_width: 0, border_color: "#ffffff" },
-      text: { font_size: 40, font_color: "#2563EB", bg_color: "#ffffff", bold: true, align: "center", opacity: 1 },
       icon: null,
-    });
+    };
   }
+  cfg.photo_data = photoBase64;
+  writeConfig(slug, cfg);
+
+  // Keep file on disk too (for this session), but config is the source of truth
   res.json({ ok: true, file: req.file.filename });
 });
 
@@ -236,6 +245,17 @@ app.delete("/api/templates/:slug", (req, res) => {
 
 // ── GET /template-image/:slug ─────────────────────────────────────────────────
 app.get("/template-image/:slug", (req, res) => {
+  // Try base64 stored in config first (survives restarts)
+  const cfg = readConfig(req.params.slug);
+  if (cfg && cfg.photo_data) {
+    const matches = cfg.photo_data.match(/^data:([^;]+);base64,(.+)$/);
+    if (matches) {
+      const mime = matches[1];
+      const buf = Buffer.from(matches[2], "base64");
+      res.set("Content-Type", mime);
+      return res.send(buf);
+    }
+  }
   const p = findPhoto(req.params.slug);
   if (!p) return res.status(404).send("No photo");
   res.sendFile(p);
@@ -451,12 +471,24 @@ app.get("/render", renderLimiter, async (req, res) => {
     const cfg = readConfig(slug);
     if (!cfg) return res.status(404).json({ error: "Template not found" });
 
-    const photoPath = findPhoto(slug);
-    if (!photoPath) return res.status(404).json({ error: "Photo not found for this template" });
+    // Load photo: prefer base64 stored in config (survives restarts), fallback to disk file
+    let photoSrc = null;
+    if (cfg.photo_data) {
+      // base64 data URI stored in config
+      const matches = cfg.photo_data.match(/^data:([^;]+);base64,(.+)$/);
+      if (matches) {
+        photoSrc = Buffer.from(matches[2], "base64");
+      }
+    }
+    if (!photoSrc) {
+      const photoPath = findPhoto(slug);
+      if (!photoPath) return res.status(404).json({ error: "Photo not found for this template" });
+      photoSrc = photoPath;
+    }
 
     const displayName = name ? String(name).trim().split(" ")[0] : "Cliente";
 
-    const baseImage = await loadImage(photoPath);
+    const baseImage = await loadImage(photoSrc);
     const W = baseImage.width, H = baseImage.height;
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext("2d");
