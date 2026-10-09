@@ -130,24 +130,19 @@ app.get("/login", (req, res) => {
 });
 
 // ── Auth guard middleware (applied AFTER auth routes) ─────────────────────────
+// Static files served freely (JS/CSS/HTML — the JS itself checks auth on load)
+app.use(express.static(path.join(__dirname, "public")));
+
+// Auth guard only for API routes (not static files or render)
 function authGuard(req, res, next) {
-  // Public: login page, auth endpoints, render endpoint (called by GHL with name)
-  if (req.path === "/login" || req.path.startsWith("/auth/") || req.path === "/render") {
-    return next();
-  }
   if (!isAuthed(req)) {
-    // API calls → 401 JSON; page requests → redirect to login
-    if (req.path.startsWith("/api/") || req.headers["x-session-id"]) {
-      return res.status(401).json({ error: "Não autenticado" });
-    }
-    return res.redirect("/login");
+    return res.status(401).json({ error: "Não autenticado" });
   }
   next();
 }
-app.use(authGuard);
-
-// Static files (served after auth guard so index.html is protected)
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/api", authGuard);
+app.use("/template-image", authGuard);
+app.use("/template-icon", authGuard);
 
 // ── Storage: templates & icons ─────────────────────────────────────────────────
 if (!fs.existsSync(TEMPLATES_DIR)) fs.mkdirSync(TEMPLATES_DIR, { recursive: true });
