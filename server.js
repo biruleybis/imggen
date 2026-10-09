@@ -218,395 +218,196 @@ app.get("/template-icon/:slug", (req, res) => {
   res.sendFile(p);
 });
 
-// ── Server-side preset helpers ────────────────────────────────────────────────
-const C = {
-  blue:"#2563EB",navy:"#0A1128",white:"#ffffff",slate:"#F8FAFC",
-  gray:"#64748B",muted:"#94a3b8",gold:"#f59e0b",green:"#16a34a",
-  teal:"#0d9488",rose:"#e11d48",pink:"#db2777",purple:"#7c3aed",
-  amber:"#d97706",red:"#dc2626",sky:"#0284c7",warm:"#92400e",
-};
-function sName(ctx, name, cx, cy, fs, color) {
-  ctx.font = `bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle = color;
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(name + "!", cx, cy);
+// ── SVG assets embutidos (Google G + Estrela) ─────────────────────────────────
+const SVG_GOOGLE = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.86l6.1-6.1C34.46 2.99 29.5 1 24 1 14.82 1 6.98 6.48 3.25 14.27l7.1 5.52C12.18 13.42 17.64 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.5 24.5c0-1.64-.15-3.22-.42-4.75H24v9.5h12.67C35.53 33.27 32.3 36 28.3 37.3l7.08 5.5C40.41 38.48 46.5 32.13 46.5 24.5z"/>
+  <path fill="#FBBC05" d="M10.35 28.21A14.57 14.57 0 0 1 9.5 24c0-1.47.2-2.89.55-4.21l-7.1-5.52A23.97 23.97 0 0 0 0 24c0 3.87.92 7.53 2.56 10.77l7.79-6.56z"/>
+  <path fill="#34A853" d="M24 47c5.5 0 10.12-1.82 13.49-4.93l-7.08-5.5C28.64 37.97 26.45 38.5 24 38.5c-6.34 0-11.72-4.27-13.65-10.05l-7.79 6.56C6.8 41.48 14.72 47 24 47z"/>
+</svg>`);
+
+const SVG_STAR = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <path fill="#FFD700" d="M24 4l5.5 11.1 12.3 1.8-8.9 8.6 2.1 12.2L24 31.9l-10.9 5.8 2.1-12.2-8.9-8.6 12.3-1.8z"/>
+  <path fill="#FFA000" d="M24 4l5.5 11.1 12.3 1.8-8.9 8.6 2.1 12.2L24 31.9V4z" opacity=".15"/>
+</svg>`);
+
+// Cache de imagens SVG carregadas
+let _googleImg = null;
+let _starImg = null;
+async function getGoogleImg() {
+  if (!_googleImg) _googleImg = await loadImage(SVG_GOOGLE);
+  return _googleImg;
 }
-function sSub(ctx, text, cx, cy, fs, color) {
-  ctx.font = `500 ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle = color;
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(text, cx, cy);
+async function getStarImg() {
+  if (!_starImg) _starImg = await loadImage(SVG_STAR);
+  return _starImg;
 }
 
-// ── Preset render functions (mirror of frontend PRESETS) ──────────────────────
+// ── Decorative dashes helper ──────────────────────────────────────────────────
+function drawDashes(ctx, cx, cy, count, len, gap, angle, color, lineW) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = lineW; ctx.lineCap = "round";
+  ctx.translate(cx, cy); ctx.rotate(angle);
+  for (let i = 0; i < count; i++) {
+    const ox = (i - (count - 1) / 2) * (len + gap);
+    ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox + len, 0); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── Core badge renderer (Google pill + star bubble) ───────────────────────────
+// underlineColor: cor do sublinhado; pillBg: cor do fundo da pílula
+async function drawV3Badge(ctx, w, h, name, opts = {}) {
+  const {
+    pillBg      = "#ffffff",
+    pillShadow  = "rgba(0,0,0,0.28)",
+    nameColor   = "#0d1b3e",
+    underColor  = "#c8a882",        // rosé/dourado padrão
+    dashColor   = "#d4b896",
+    starBubbleBg= "#ffffff",
+    font        = "bold 72px Georgia, 'Times New Roman', serif",
+    yPos        = 0.72,             // posição Y centro da pílula (fração de h)
+  } = opts;
+
+  const gImg = await getGoogleImg();
+  const sImg = await getStarImg();
+
+  // Dimensões base
+  const pilH = Math.round(h * 0.135);
+  const gSize = Math.round(pilH * 1.55);   // círculo Google (maior que a pílula)
+  const gR = gSize / 2;
+
+  // Medir nome
+  ctx.font = font.replace("72px", `${Math.round(h * 0.095)}px`);
+  const nameW = ctx.measureText(name).width;
+
+  const innerPad = Math.round(pilH * 0.38);
+  const gGap = Math.round(gR * 0.55);      // sobreposição Google sai à esquerda
+  const pilW = gR + gGap + innerPad + nameW + innerPad;
+
+  const cx = w / 2 + gR * 0.3;             // ligeiramente direita para equilibrar Google
+  const cy = Math.round(h * yPos);
+  const pilX = cx - pilW / 2 + gR * 0.6;
+  const pilY = cy - pilH / 2;
+
+  // ── Tracinhos decorativos ──
+  const dc = dashColor;
+  drawDashes(ctx, pilX - gR - 10, cy - pilH * 0.6, 2, 14, 5, -0.5, dc, 3);
+  drawDashes(ctx, pilX - gR - 18, cy + pilH * 0.3, 2, 10, 4, 0.3, dc, 2.5);
+  drawDashes(ctx, pilX + pilW + 12, cy - pilH * 0.4, 2, 12, 4, 0.5, dc, 2.5);
+
+  // ── Círculo branco do Google ──
+  ctx.save();
+  ctx.shadowColor = pillShadow; ctx.shadowBlur = 18;
+  ctx.beginPath(); ctx.arc(pilX - gGap, cy, gR, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff"; ctx.fill();
+  ctx.restore();
+  // Logo G
+  ctx.drawImage(gImg, pilX - gGap - gR * 0.6, cy - gR * 0.6, gR * 1.2, gR * 1.2);
+
+  // ── Pílula branca do nome ──
+  const pilR = pilH / 2;
+  ctx.save();
+  ctx.shadowColor = pillShadow; ctx.shadowBlur = 22;
+  roundRect(ctx, pilX, pilY, pilW, pilH, pilR);
+  ctx.fillStyle = pillBg; ctx.fill();
+  ctx.restore();
+
+  // ── Nome (fonte cursiva) ──
+  const nameFs = Math.round(h * 0.095);
+  ctx.font = `bold ${nameFs}px Georgia, 'Times New Roman', serif`;
+  ctx.fillStyle = nameColor; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  const nameX = pilX + gR + gGap * 0.1 + innerPad * 0.6;
+  ctx.fillText(name, nameX, cy);
+
+  // ── Sublinhado curvo (linha simples com espessura) ──
+  const underW = nameW * 0.85;
+  const underX = nameX + nameW * 0.05;
+  const underY = cy + nameFs * 0.55;
+  ctx.beginPath();
+  ctx.moveTo(underX, underY);
+  ctx.quadraticCurveTo(underX + underW / 2, underY + nameFs * 0.08, underX + underW, underY);
+  ctx.strokeStyle = underColor; ctx.lineWidth = Math.round(nameFs * 0.055); ctx.lineCap = "round";
+  ctx.stroke();
+
+  // ── Bolha da estrela ──
+  const sbSize = Math.round(gSize * 0.75);
+  const sbX = pilX + pilW - sbSize * 0.15;
+  const sbY = pilY - sbSize * 0.55;
+  ctx.save();
+  ctx.shadowColor = pillShadow; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(sbX, sbY, sbSize / 2, 0, Math.PI * 2);
+  ctx.fillStyle = starBubbleBg; ctx.fill();
+  ctx.restore();
+  ctx.drawImage(sImg, sbX - sbSize * 0.38, sbY - sbSize * 0.38, sbSize * 0.76, sbSize * 0.76);
+}
+
+// ── Preset render functions (V3 — Google badge style) ────────────────────────
 const PRESETS = {
-  // UNIVERSAL
-  "u-rodape-clean": (ctx,w,h,name) => {
-    const bh=Math.round(h*.18),by=h-bh;
-    ctx.fillStyle="#fff"; ctx.fillRect(0,by,w,bh);
-    ctx.font=`${Math.round(h*.04)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#f59e0b";
-    ctx.textAlign="center"; ctx.textBaseline="top"; ctx.fillText("⭐⭐⭐⭐⭐",w/2,by+bh*.1);
-    sName(ctx,name,w/2,by+bh*.68,Math.round(h*.07),C.blue);
-  },
-  "u-pill-center": (ctx,w,h,name) => {
-    const bw=Math.round(w*.62),bh=Math.round(h*.13),bx=(w-bw)/2,by=h*.42,r=bh/2;
-    roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=C.blue; ctx.fill();
-    ctx.lineWidth=3; ctx.strokeStyle="#fff"; ctx.stroke();
-    sName(ctx,name,w/2,by+bh/2,Math.round(h*.065),"#fff");
-  },
-  "u-obrigado": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,16); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    sSub(ctx,"Obrigado pela visita,",w/2,by+bh*.28,Math.round(h*.038),C.gray);
-    sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),C.blue);
-    sSub(ctx,"Sua opiniao faz a diferenca! Avalie ⭐",w/2,by+bh*.82,Math.round(h*.033),C.gold);
-  },
-  "u-assinatura": (ctx,w,h,name) => {
-    const bw=w*.44,bh=h*.115,bx=w-bw-w*.04,by=h-bh-h*.05;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,4); ctx.fillStyle=C.slate; ctx.fill(); ctx.restore();
-    ctx.fillStyle=C.blue; ctx.fillRect(bx,by,4,bh);
-    sSub(ctx,name,bx+bw/2+2,by+bh/2,Math.round(h*.052),C.navy);
-  },
-  "u-banner-topo": (ctx,w,h,name) => {
-    const bh=Math.round(h*.16); ctx.fillStyle=C.blue; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+", avalie nossa empresa! ⭐",w/2,bh/2,Math.round(h*.065),"#fff");
-  },
-  "u-dupla": (ctx,w,h,name) => {
-    const bw=w*.7,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-    ctx.save(); ctx.globalAlpha=.97; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle=C.slate; ctx.fill(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.35,Math.round(h*.068),C.navy);
-    sSub(ctx,"Sua opiniao importa muito",w/2,by+bh*.72,Math.round(h*.035),C.blue);
-  },
-  "u-highlight": (ctx,w,h,name) => {
-    ctx.fillStyle="rgba(10,17,40,.52)"; ctx.fillRect(0,0,w,h);
-    const bw=w*.65,bh=h*.23,bx=(w-bw)/2,by=h*.38;
-    ctx.save(); ctx.globalAlpha=.92; roundRect(ctx,bx,by,bw,bh,10); ctx.fillStyle=C.navy; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle=C.blue; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.38,Math.round(h*.08),"#fff");
-    sSub(ctx,"Conta pra gente como foi!",w/2,by+bh*.75,Math.round(h*.032),"#93c5fd");
-  },
-  "u-badge-lat": (ctx,w,h,name) => {
-    const bw=Math.round(w*.18); ctx.fillStyle=C.blue; ctx.fillRect(0,0,bw,h);
-    ctx.save(); ctx.translate(bw/2,h/2); ctx.rotate(-Math.PI/2);
-    sSub(ctx,name+" — Avalie!",0,0,Math.round(h*.054),"#fff"); ctx.restore();
-  },
-  // CLÍNICAS
-  "cl-confianca": (ctx,w,h,name) => {
-    const bh=h*.22,by=h-bh;
-    const grd=ctx.createLinearGradient(0,by,0,h);
-    grd.addColorStop(0,"rgba(13,148,136,0)"); grd.addColorStop(1,"rgba(13,148,136,.92)");
-    ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-    sSub(ctx,"Obrigado por confiar em nossa equipe,",w/2,by+bh*.32,Math.round(h*.036),"#fff");
-    sName(ctx,name,w/2,by+bh*.65,Math.round(h*.075),"#fff");
-    sSub(ctx,"Deixe sua avaliacao ⭐",w/2,by+bh*.88,Math.round(h*.03),"#99f6e4");
-  },
-  "cl-saude": (ctx,w,h,name) => {
-    const bw=w*.8,bh=h*.3,bx=(w-bw)/2,by=h*.33;
-    ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,18); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.07)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("🏥",w/2,by+bh*.25);
-    sName(ctx,name,w/2,by+bh*.55,Math.round(h*.07),C.teal);
-    sSub(ctx,"Como foi sua consulta? Avalie!",w/2,by+bh*.82,Math.round(h*.033),C.gray);
-  },
-  "cl-missao": (ctx,w,h,name) => {
-    const bh=Math.round(h*.17);
-    const grd=ctx.createLinearGradient(0,0,0,bh);
-    grd.addColorStop(0,C.teal); grd.addColorStop(1,"#065f46");
-    ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" — Sua saude, nossa missao",w/2,bh/2,Math.round(h*.055),"#fff");
-  },
-  "cl-consulta": (ctx,w,h,name) => {
-    const bw=w*.72,bh=h*.26,bx=(w-bw)/2,by=h*.38;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,12); ctx.fillStyle="#fff"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle=C.teal; ctx.stroke(); ctx.restore();
-    sSub(ctx,"Sua consulta foi concluida,",w/2,by+bh*.25,Math.round(h*.035),C.gray);
-    sName(ctx,name,w/2,by+bh*.56,Math.round(h*.075),C.teal);
-    sSub(ctx,"Avalie nosso atendimento ⭐",w/2,by+bh*.82,Math.round(h*.032),C.gold);
-  },
-  "cl-estrelas": (ctx,w,h,name) => {
-    const bh=h*.2,by=h-bh; ctx.fillStyle=C.teal; ctx.fillRect(0,by,w,bh);
-    sName(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),"#fff");
-    sSub(ctx,"Como foi o seu atendimento? Avalie!",w/2,by+bh*.72,Math.round(h*.032),"#99f6e4");
-  },
-  // ACADEMIAS
-  "ac-conquista": (ctx,w,h,name) => {
-    ctx.fillStyle="rgba(0,0,0,.48)"; ctx.fillRect(0,0,w,h);
-    const bw=w*.72,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    roundRect(ctx,bx,by,bw,bh,6); ctx.fillStyle="#111827"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle="#facc15"; ctx.stroke();
-    sName(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#facc15");
-    sSub(ctx,"Voce e parte da nossa familia! 💪",w/2,by+bh*.68,Math.round(h*.034),"#fff");
-    sSub(ctx,"Avalie nossa academia ⭐",w/2,by+bh*.88,Math.round(h*.028),"#facc15");
-  },
-  "ac-energia": (ctx,w,h,name) => {
-    const bh=Math.round(h*.18),by=h-bh;
-    const grd=ctx.createLinearGradient(0,by,w,by+bh);
-    grd.addColorStop(0,"#dc2626"); grd.addColorStop(1,"#ea580c");
-    ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-    sName(ctx,name,w/2,by+bh*.35,Math.round(h*.065),"#fff");
-    sSub(ctx,"Sua energia transforma! ⚡ Avalie-nos",w/2,by+bh*.75,Math.round(h*.032),"#fed7aa");
-  },
-  "ac-evolucao": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.26,bx=(w-bw)/2,by=h*.37;
-    ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("💪",w/2,by+bh*.25);
-    sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#facc15");
-    sSub(ctx,"Avalie nossa evolucao juntos!",w/2,by+bh*.84,Math.round(h*.03),"#9ca3af");
-  },
-  "ac-familia": (ctx,w,h,name) => {
-    const bh=Math.round(h*.17); ctx.fillStyle="#dc2626"; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" — Sua opiniao nos faz mais fortes!",w/2,bh/2,Math.round(h*.052),"#fff");
-  },
-  "ac-resultado": (ctx,w,h,name) => {
-    const bw=w*.68,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#111827"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle="#facc15"; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.35,Math.round(h*.068),"#facc15");
-    sSub(ctx,"🏆 Resultado que fala por si!",w/2,by+bh*.72,Math.round(h*.034),"#fff");
-  },
-  // PET SHOP
-  "pt-amor": (ctx,w,h,name) => {
-    const bh=h*.22,by=h-bh; ctx.fillStyle="#f472b6"; ctx.fillRect(0,by,w,bh);
-    sSub(ctx,"Obrigado por cuidar tao bem do seu pet,",w/2,by+bh*.28,Math.round(h*.035),"#fff");
-    sName(ctx,name,w/2,by+bh*.6,Math.round(h*.072),"#fff");
-    sSub(ctx,"🐾 Deixe sua avaliacao ⭐",w/2,by+bh*.87,Math.round(h*.03),"#fce7f3");
-  },
-  "pt-cuidado": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,20); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.07)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("🐾",w/2,by+bh*.24);
-    sName(ctx,name,w/2,by+bh*.55,Math.round(h*.072),"#db2777");
-    sSub(ctx,"Como foi o atendimento do seu pet? Avalie!",w/2,by+bh*.82,Math.round(h*.03),C.gray);
-  },
-  "pt-familia": (ctx,w,h,name) => {
-    const bh=Math.round(h*.17);
-    const grd=ctx.createLinearGradient(0,0,w,0);
-    grd.addColorStop(0,"#db2777"); grd.addColorStop(1,"#9333ea");
-    ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" 🐾 — Obrigado por fazer parte da familia!",w/2,bh/2,Math.round(h*.048),"#fff");
-  },
-  "pt-servico": (ctx,w,h,name) => {
-    const bw=w*.74,bh=h*.25,bx=(w-bw)/2,by=h*.38;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#fff"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
-    sSub(ctx,"Banho & Tosa concluido! ✂️",w/2,by+bh*.27,Math.round(h*.038),C.gray);
-    sName(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#db2777");
-    sSub(ctx,"Como foi o servico? Avalie ⭐",w/2,by+bh*.84,Math.round(h*.032),C.gold);
-  },
-  "pt-melhor": (ctx,w,h,name) => {
-    const bh=h*.2,by=h-bh; ctx.fillStyle="#7e22ce"; ctx.fillRect(0,by,w,bh);
-    sName(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),"#fff");
-    sSub(ctx,"Conte como foi o cuidado do seu pet 🐾",w/2,by+bh*.72,Math.round(h*.03),"#e9d5ff");
-  },
-  // ESTÉTICA
-  "es-brilho": (ctx,w,h,name) => {
-    ctx.fillStyle="rgba(0,0,0,.4)"; ctx.fillRect(0,0,w,h);
-    const bw=w*.75,bh=h*.28,bx=(w-bw)/2,by=h*.36;
-    ctx.save(); ctx.globalAlpha=.92; roundRect(ctx,bx,by,bw,bh,16); ctx.fillStyle="#1c0a0a"; ctx.fill();
-    ctx.lineWidth=1; ctx.strokeStyle="#d97706"; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#fde68a");
-    sSub(ctx,"Como foi sua experiencia conosco? ✨",w/2,by+bh*.66,Math.round(h*.036),"#fff");
-    sSub(ctx,"Avalie e deixe seu feedback",w/2,by+bh*.88,Math.round(h*.028),"#d97706");
-  },
-  "es-experiencia": (ctx,w,h,name) => {
-    const bh=h*.22,by=h-bh;
-    const grd=ctx.createLinearGradient(0,by,0,h);
-    grd.addColorStop(0,"rgba(219,39,119,0)"); grd.addColorStop(1,"rgba(219,39,119,.9)");
-    ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-    sSub(ctx,"Como foi sua experiencia conosco,",w/2,by+bh*.3,Math.round(h*.036),"#fff");
-    sName(ctx,name,w/2,by+bh*.62,Math.round(h*.072),"#fff");
-    sSub(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.88,Math.round(h*.03),"#fce7f3");
-  },
-  "es-exclusivo": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,20); ctx.fillStyle="#fff7ed"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("👑",w/2,by+bh*.24);
-    sName(ctx,name,w/2,by+bh*.55,Math.round(h*.072),"#92400e");
-    sSub(ctx,"tratamento de excelencia para voce!",w/2,by+bh*.82,Math.round(h*.032),C.amber);
-  },
-  "es-relaxa": (ctx,w,h,name) => {
-    const bh=Math.round(h*.17);
-    const grd=ctx.createLinearGradient(0,0,w,0);
-    grd.addColorStop(0,"#7c3aed"); grd.addColorStop(1,"#db2777");
-    ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" 🧘 — Como foi seu momento?",w/2,bh/2,Math.round(h*.052),"#fff");
-  },
-  "es-autocuidado": (ctx,w,h,name) => {
-    const bw=w*.72,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-    ctx.save(); ctx.globalAlpha=.97; roundRect(ctx,bx,by,bw,bh,12); ctx.fillStyle="#fff0f6"; ctx.fill();
-    ctx.lineWidth=1.5; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#be185d");
-    sSub(ctx,"🌸 Conte como foi sua experiencia. Avalie!",w/2,by+bh*.73,Math.round(h*.033),"#db2777");
-  },
-  // JURÍDICO
-  "ju-confianca": (ctx,w,h,name) => {
-    ctx.fillStyle="rgba(10,17,40,.5)"; ctx.fillRect(0,0,w,h);
-    const bw=w*.74,bh=h*.26,bx=(w-bw)/2,by=h*.37;
-    ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,6); ctx.fillStyle="#0f172a"; ctx.fill();
-    ctx.lineWidth=1; ctx.strokeStyle="#94a3b8"; ctx.stroke(); ctx.restore();
-    sSub(ctx,"Foi um prazer atende-lo,",w/2,by+bh*.28,Math.round(h*.036),"#94a3b8");
-    sName(ctx,name,w/2,by+bh*.58,Math.round(h*.078),"#fff");
-    sSub(ctx,"Sua avaliacao fortalece nossa reputacao.",w/2,by+bh*.84,Math.round(h*.03),"#64748b");
-  },
-  "ju-reputacao": (ctx,w,h,name) => {
-    const bh=h*.2,by=h-bh; ctx.fillStyle="#0f172a"; ctx.fillRect(0,by,w,bh);
-    ctx.lineWidth=1; ctx.strokeStyle="#334155";
-    ctx.beginPath(); ctx.moveTo(0,by); ctx.lineTo(w,by); ctx.stroke();
-    sName(ctx,name,w/2,by+bh*.35,Math.round(h*.062),"#fff");
-    sSub(ctx,"⚖️ Avalie nosso atendimento — sua opiniao importa",w/2,by+bh*.72,Math.round(h*.03),"#94a3b8");
-  },
-  "ju-sessao": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    ctx.save(); ctx.globalAlpha=.95; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("🧠",w/2,by+bh*.23);
-    sSub(ctx,"Obrigado pela sessao,",w/2,by+bh*.5,Math.round(h*.036),C.gray);
-    sName(ctx,name,w/2,by+bh*.73,Math.round(h*.068),"#7c3aed");
-    sSub(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.91,Math.round(h*.028),C.gold);
-  },
-  "ju-elegante": (ctx,w,h,name) => {
-    const bh=Math.round(h*.15); ctx.fillStyle="#1e293b"; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" — Obrigado pela confianca em nosso trabalho.",w/2,bh/2,Math.round(h*.046),"#e2e8f0");
-  },
-  "ju-parceria": (ctx,w,h,name) => {
-    const bw=w*.7,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,8); ctx.fillStyle="#0f172a"; ctx.fill();
-    ctx.lineWidth=1.5; ctx.strokeStyle="#7c3aed"; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#fff");
-    sSub(ctx,"🤝 Parceria que constroi resultados. Avalie!",w/2,by+bh*.73,Math.round(h*.032),"#a78bfa");
-  },
-  // SERVIÇOS
-  "sv-resolvido": (ctx,w,h,name) => {
-    const bh=h*.22,by=h-bh; ctx.fillStyle=C.green; ctx.fillRect(0,by,w,bh);
-    sSub(ctx,"✅ Servico concluido com sucesso,",w/2,by+bh*.28,Math.round(h*.036),"#fff");
-    sName(ctx,name,w/2,by+bh*.6,Math.round(h*.072),"#fff");
-    sSub(ctx,"Como avalia nosso trabalho? ⭐",w/2,by+bh*.87,Math.round(h*.03),"#bbf7d0");
-  },
-  "sv-seguranca": (ctx,w,h,name) => {
-    const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-    ctx.save(); ctx.globalAlpha=.94; roundRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("🛡️",w/2,by+bh*.24);
-    sName(ctx,name,w/2,by+bh*.54,Math.round(h*.073),C.green);
-    sSub(ctx,"Sua casa protegida. Avalie nosso servico!",w/2,by+bh*.82,Math.round(h*.032),C.gray);
-  },
-  "sv-qualidade": (ctx,w,h,name) => {
-    const bh=Math.round(h*.17); ctx.fillStyle=C.green; ctx.fillRect(0,0,w,bh);
-    sSub(ctx,name+" 🔧 — Servico de qualidade ✔",w/2,bh/2,Math.round(h*.052),"#fff");
-  },
-  "sv-alivio": (ctx,w,h,name) => {
-    ctx.fillStyle="rgba(0,0,0,.45)"; ctx.fillRect(0,0,w,h);
-    const bw=w*.68,bh=h*.24,bx=(w-bw)/2,by=h*.38;
-    ctx.save(); ctx.globalAlpha=.93; roundRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#052e16"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle=C.green; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.38,Math.round(h*.078),"#4ade80");
-    sSub(ctx,"Problema resolvido! 😌 Avalie-nos!",w/2,by+bh*.75,Math.round(h*.034),"#fff");
-  },
-  "sv-profissional": (ctx,w,h,name) => {
-    const bw=w*.7,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#052e16"; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle="#4ade80"; ctx.stroke(); ctx.restore();
-    sName(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#4ade80");
-    sSub(ctx,"👷 Feito por profissionais. Avalie ⭐",w/2,by+bh*.73,Math.round(h*.032),"#fff");
+
+  // 1. Classic — pílula branca, sublinhado rosé, fundo neutro (universal)
+  "v3-classic": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#ffffff", nameColor:"#0d1b3e", underColor:"#c8a882",
+      dashColor:"#d4b896", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // ── V2: Caixa sólida + ícone + nome — estilo moderno ─────────────────────────
-  // Template 1: Caixa escura na base (dark pill) — universal
-  "v2-dark-base": (ctx,w,h,name) => {
-    const bw=w*.78,bh=Math.round(h*.14),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
-    ctx.save(); ctx.globalAlpha=.93; roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0d0d0d"; ctx.fill(); ctx.restore();
-    const fs=Math.round(h*.065),iS=Math.round(h*.055),pad=Math.round(bw*.07);
-    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("⭐",bx+pad,by+bh/2);
-    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+8,by+bh/2);
+  // 2. Dark — pílula escura, nome claro, sublinhado dourado (universal)
+  "v3-dark": async (ctx,w,h,name) => {
+    ctx.fillStyle="rgba(0,0,0,.22)"; ctx.fillRect(0,0,w,h);
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#0d1b3e", nameColor:"#ffffff", underColor:"#f59e0b",
+      dashColor:"#94a3b8", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // Template 2: Caixa branca sólida (clean card) — universal
-  "v2-white-card": (ctx,w,h,name) => {
-    const bw=w*.76,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=12;
-    ctx.save(); ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=18; roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#ffffff"; ctx.fill(); ctx.restore();
-    const fs=Math.round(h*.062),pad=Math.round(bw*.06);
-    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
-    ctx.fillText(name,bx+pad,by+bh*.5);
-    const metrics=ctx.measureText(name); const lx=bx+pad,ly=by+bh*.78,lw=Math.min(metrics.width,bw*.55);
-    ctx.fillStyle=C.blue; ctx.fillRect(lx,ly,lw,3);
+  // 3. Blue — pílula azul, nome branco, sublinhado âmbar (clínica/academia)
+  "v3-blue": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#1d4ed8", nameColor:"#ffffff", underColor:"#fbbf24",
+      dashColor:"#93c5fd", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // Template 3: Caixa na cor da marca (brand pill) — clinica
-  "v2-brand-pill": (ctx,w,h,name) => {
-    const bw=w*.74,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
-    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=C.blue; ctx.fill(); ctx.restore();
-    const fs=Math.round(h*.06),pad=Math.round(bw*.07),iS=Math.round(h*.055);
-    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("❤️",bx+pad,by+bh/2);
-    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+10,by+bh/2);
+  // 4. Rose — pílula rosé, nome vinho, sublinhado rosa (estética/beleza)
+  "v3-rose": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#fff1f2", nameColor:"#881337", underColor:"#f43f5e",
+      dashColor:"#fda4af", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // Template 4: Ícone + nome minimalista (chip) — petshop
-  "v2-icon-chip": (ctx,w,h,name) => {
-    const pad=32,iS=Math.round(h*.07),gap=12;
-    ctx.font=`bold ${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`;
-    const tw=ctx.measureText(name).width;
-    const bw=iS+gap+tw+pad*2,bh=Math.round(h*.125);
-    const bx=(w-bw)/2,by=h-bh-h*.05,r=10;
-    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
-    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
-    ctx.fillText("🐾",bx+pad,by+bh/2);
-    ctx.font=`bold ${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff";
-    ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+  // 5. Teal — pílula teal, nome branco, sublinhado amarelo (clínica/saúde)
+  "v3-teal": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#0f766e", nameColor:"#ffffff", underColor:"#fde047",
+      dashColor:"#5eead4", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // Template 5: Ícone nicho + nome — academia
-  "v2-nicho-academia": (ctx,w,h,name) => {
-    const pad=28,iS=Math.round(h*.065),gap=10;
-    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`;
-    const tw=ctx.measureText(name).width;
-    const bw=iS+gap+tw+pad*2,bh=Math.round(h*.12);
-    const bx=(w-bw)/2,by=h-bh-h*.05,r=8;
-    const grd=ctx.createLinearGradient(bx,by,bx+bw,by); grd.addColorStop(0,"#1d4ed8"); grd.addColorStop(1,"#111827");
-    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=grd; ctx.fill(); ctx.restore();
-    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#facc15"; ctx.textAlign="left"; ctx.textBaseline="middle";
-    ctx.fillText("💪",bx+pad,by+bh/2);
-    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff";
-    ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+  // 6. Slate — pílula cinza escuro, nome branco, sublinhado âmbar (jurídico)
+  "v3-slate": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#1e293b", nameColor:"#f1f5f9", underColor:"#d97706",
+      dashColor:"#64748b", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // Template 6: Ícone com cor de destaque (accent icon) — estetica
-  "v2-accent-estetica": (ctx,w,h,name) => {
-    const bw=w*.78,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10,acW=Math.round(bh*.9),acX=bx,acY=by+(bh-acW)/2;
-    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-    ctx.save(); roundRect(ctx,acX,acY,acW,acW,r); ctx.fillStyle="#db2777"; ctx.fill(); ctx.restore();
-    ctx.font=`${Math.round(acW*.6)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("💅",acX+acW/2,acY+acW/2);
-    const fs=Math.round(h*.062),tx=acX+acW+16;
-    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
-    ctx.fillText(name,tx,by+bh/2);
+  // 7. Ivory — pílula creme, nome marrom, sublinhado dourado (estética premium)
+  "v3-ivory": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#faf7f2", nameColor:"#78350f", underColor:"#b45309",
+      dashColor:"#d4b896", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 
-  // Template 7: Ícone + separador vertical (split card) — juridico
-  "v2-split-juridico": (ctx,w,h,name) => {
-    const bw=w*.76,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10;
-    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0f172a"; ctx.fill(); ctx.restore();
-    const iS=Math.round(h*.06),pad=Math.round(bh*.18),sepX=bx+pad+iS+pad*.8;
-    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("⚖️",bx+pad+iS/2,by+bh/2);
-    ctx.strokeStyle="rgba(255,255,255,.2)"; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(sepX,by+bh*.2); ctx.lineTo(sepX,by+bh*.8); ctx.stroke();
-    ctx.font=`bold ${Math.round(h*.058)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
-    ctx.fillText(name,sepX+14,by+bh/2);
-  },
-
-  // Template 8: Ícone nicho + nome — servicos
-  "v2-nicho-servicos": (ctx,w,h,name) => {
-    const pad=26,iS=Math.round(h*.065),gap=12;
-    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`;
-    const tw=ctx.measureText(name).width;
-    const bw=iS+gap+tw+pad*2,bh=Math.round(h*.12);
-    const bx=(w-bw)/2,by=h-bh-h*.05,r=8;
-    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#16a34a"; ctx.fill(); ctx.restore();
-    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
-    ctx.fillText("🏠",bx+pad,by+bh/2);
-    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff";
-    ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+  // 8. Green — pílula verde, nome branco, sublinhado lima (serviços/petshop)
+  "v3-green": async (ctx,w,h,name) => {
+    await drawV3Badge(ctx,w,h,name,{
+      pillBg:"#15803d", nameColor:"#ffffff", underColor:"#bbf7d0",
+      dashColor:"#86efac", starBubbleBg:"#ffffff", yPos:0.72,
+    });
   },
 };
 
@@ -633,10 +434,10 @@ app.get("/render", renderLimiter, async (req, res) => {
     // Draw base photo
     ctx.drawImage(baseImage, 0, 0);
 
-    // If preset is stored, use preset renderer
+    // If preset is stored, use preset renderer (may be async)
     const presetFn = cfg.preset_id && PRESETS[cfg.preset_id];
     if (presetFn) {
-      presetFn(ctx, W, H, displayName);
+      await presetFn(ctx, W, H, displayName);
     } else {
       // Manual box render
       const { box, text, icon } = cfg;

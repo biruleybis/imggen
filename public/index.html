@@ -620,15 +620,8 @@ let selectedPresetId = null;
 
 // ── Segments ──────────────────────────────────────────────────────────────────
 const SEGMENTS = [
-  { id: "all",       label: "Todos",     emoji: "🔍" },
-  { id: "universal", label: "Universal", emoji: "✨" },
-  { id: "clinica",   label: "Clínicas",  emoji: "🏥" },
-  { id: "academia",  label: "Academias", emoji: "💪" },
-  { id: "petshop",   label: "Pet Shop",  emoji: "🐾" },
-  { id: "estetica",  label: "Estética",  emoji: "💅" },
-  { id: "juridico",  label: "Jurídico",  emoji: "⚖️" },
-  { id: "servicos",  label: "Serviços",  emoji: "🔧" },
-  { id: "v2",        label: "Estilo V2", emoji: "🆕" },
+  { id: "all",   label: "Todos",  emoji: "🔍" },
+  { id: "v3",    label: "V3 Badge", emoji: "⭐" },
 ];
 
 let selectedSegment = "all";
@@ -640,6 +633,117 @@ const C = {
   teal:"#0d9488", rose:"#e11d48", pink:"#db2777", purple:"#7c3aed",
   amber:"#d97706", red:"#dc2626", sky:"#0284c7", warm:"#92400e",
 };
+
+// ── V3 SVG assets (inline data URIs for browser canvas) ──────────────────────
+const GOOGLE_SVG_URI = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.86l6.1-6.1C34.46 2.99 29.5 1 24 1 14.82 1 6.98 6.48 3.25 14.27l7.1 5.52C12.18 13.42 17.64 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.64-.15-3.22-.42-4.75H24v9.5h12.67C35.53 33.27 32.3 36 28.3 37.3l7.08 5.5C40.41 38.48 46.5 32.13 46.5 24.5z"/><path fill="#FBBC05" d="M10.35 28.21A14.57 14.57 0 0 1 9.5 24c0-1.47.2-2.89.55-4.21l-7.1-5.52A23.97 23.97 0 0 0 0 24c0 3.87.92 7.53 2.56 10.77l7.79-6.56z"/><path fill="#34A853" d="M24 47c5.5 0 10.12-1.82 13.49-4.93l-7.08-5.5C28.64 37.97 26.45 38.5 24 38.5c-6.34 0-11.72-4.27-13.65-10.05l-7.79 6.56C6.8 41.48 14.72 47 24 47z"/></svg>`);
+const STAR_SVG_URI = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFD700" d="M24 4l5.5 11.1 12.3 1.8-8.9 8.6 2.1 12.2L24 31.9l-10.9 5.8 2.1-12.2-8.9-8.6 12.3-1.8z"/></svg>`);
+
+// Pre-load images once — redraw thumbnails when ready
+const _gImg = new Image();
+const _sImg = new Image();
+let _svgLoadedCount = 0;
+function _onSvgLoad() {
+  _svgLoadedCount++;
+  if (_svgLoadedCount >= 2) {
+    // Redraw all preset thumbs once both SVGs are loaded
+    if (typeof refreshAllPresetThumbs === "function") setTimeout(refreshAllPresetThumbs, 0);
+    if (typeof drawBoxPreview === "function") setTimeout(drawBoxPreview, 0);
+  }
+}
+_gImg.onload = _onSvgLoad; _gImg.src = GOOGLE_SVG_URI;
+_sImg.onload = _onSvgLoad; _sImg.src = STAR_SVG_URI;
+
+function drawDashes(ctx, cx, cy, count, len, gap, angle, color, lineW) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = lineW; ctx.lineCap = "round";
+  ctx.translate(cx, cy); ctx.rotate(angle);
+  for (let i = 0; i < count; i++) {
+    const ox = (i - (count-1)/2) * (len+gap);
+    ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox+len, 0); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawV3Badge(ctx, w, h, name, opts) {
+  opts = opts || {};
+  const pillBg      = opts.pillBg      || "#ffffff";
+  const pillShadow  = opts.pillShadow  || "rgba(0,0,0,0.28)";
+  const nameColor   = opts.nameColor   || "#0d1b3e";
+  const underColor  = opts.underColor  || "#c8a882";
+  const dashColor   = opts.dashColor   || "#d4b896";
+  const starBubbleBg= opts.starBubbleBg|| "#ffffff";
+  const yPos        = opts.yPos        || 0.72;
+
+  const pilH = Math.round(h * 0.135);
+  const gSize = Math.round(pilH * 1.55);
+  const gR = gSize / 2;
+
+  const nameFs = Math.round(h * 0.095);
+  ctx.font = `bold ${nameFs}px Georgia, 'Times New Roman', serif`;
+  const nameW = ctx.measureText(name).width;
+
+  const innerPad = Math.round(pilH * 0.38);
+  const gGap = Math.round(gR * 0.55);
+  const pilW = gR + gGap + innerPad + nameW + innerPad;
+
+  const cx = w / 2 + gR * 0.3;
+  const cy = Math.round(h * yPos);
+  const pilX = cx - pilW / 2 + gR * 0.6;
+  const pilY = cy - pilH / 2;
+
+  // Decorative dashes
+  drawDashes(ctx, pilX - gR - 10, cy - pilH*0.6, 2, 14, 5, -0.5, dashColor, 3);
+  drawDashes(ctx, pilX - gR - 18, cy + pilH*0.3, 2, 10, 4, 0.3, dashColor, 2.5);
+  drawDashes(ctx, pilX + pilW + 12, cy - pilH*0.4, 2, 12, 4, 0.5, dashColor, 2.5);
+
+  // Google circle shadow + white bg
+  ctx.save();
+  ctx.shadowColor = pillShadow; ctx.shadowBlur = 18;
+  ctx.beginPath(); ctx.arc(pilX - gGap, cy, gR, 0, Math.PI*2);
+  ctx.fillStyle = "#ffffff"; ctx.fill();
+  ctx.restore();
+  // Google logo
+  if (_gImg.complete && _gImg.naturalWidth > 0) {
+    ctx.drawImage(_gImg, pilX-gGap - gR*0.6, cy - gR*0.6, gR*1.2, gR*1.2);
+  }
+
+  // Pill (rounded rect)
+  const pilR = pilH / 2;
+  ctx.save();
+  ctx.shadowColor = pillShadow; ctx.shadowBlur = 22;
+  rRect(ctx, pilX, pilY, pilW, pilH, pilR);
+  ctx.fillStyle = pillBg; ctx.fill();
+  ctx.restore();
+
+  // Name text
+  ctx.font = `bold ${nameFs}px Georgia, 'Times New Roman', serif`;
+  ctx.fillStyle = nameColor; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  const nameX = pilX + gR + gGap*0.1 + innerPad*0.6;
+  ctx.fillText(name, nameX, cy);
+
+  // Curved underline
+  const underW = nameW * 0.85;
+  const underX = nameX + nameW * 0.05;
+  const underY = cy + nameFs * 0.55;
+  ctx.beginPath();
+  ctx.moveTo(underX, underY);
+  ctx.quadraticCurveTo(underX + underW/2, underY + nameFs*0.08, underX + underW, underY);
+  ctx.strokeStyle = underColor; ctx.lineWidth = Math.round(nameFs*0.055); ctx.lineCap = "round";
+  ctx.stroke();
+
+  // Star bubble
+  const sbSize = Math.round(gSize * 0.75);
+  const sbX = pilX + pilW - sbSize*0.15;
+  const sbY = pilY - sbSize*0.55;
+  ctx.save();
+  ctx.shadowColor = pillShadow; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(sbX, sbY, sbSize/2, 0, Math.PI*2);
+  ctx.fillStyle = starBubbleBg; ctx.fill();
+  ctx.restore();
+  if (_sImg.complete && _sImg.naturalWidth > 0) {
+    ctx.drawImage(_sImg, sbX - sbSize*0.38, sbY - sbSize*0.38, sbSize*0.76, sbSize*0.76);
+  }
+}
 
 // ── Rounded rect helper ───────────────────────────────────────────────────────
 function rRect(ctx, x, y, w, h, r) {
@@ -667,578 +771,70 @@ function starsRow(ctx, cx, cy, size, color) {
 
 // ── Preset definitions ────────────────────────────────────────────────────────
 const PRESETS = [
-  // ─── UNIVERSAL ───────────────────────────────────────────────────────────────
+  // ─── V3 BADGE PRESETS ────────────────────────────────────────────────────────
   {
-    id: "u-rodape-clean", label: "Rodapé Clean", emoji: "📋", segment: "universal",
-    description: "Faixa branca na base com estrelas e nome",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.82),width:w,height:Math.round(h*.18),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:C.blue,bg_color:"#fff",bold:true,align:"center",opacity:1} }; },
+    id: "v3-classic", label: "Classic", emoji: "⭐", segment: "v3",
+    description: "Pílula branca clássica com sublinhado caramelo",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#0d1b3e",bg_color:"#fff",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bh=Math.round(h*.18), by=h-bh;
-      ctx.fillStyle=C.white; ctx.fillRect(0,by,w,bh);
-      starsRow(ctx,w/2,by+bh*.25,Math.round(h*.04));
-      nameText(ctx,name,w/2,by+bh*.68,Math.round(h*.07),C.blue);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#ffffff", nameColor:"#0d1b3e", underColor:"#c8a882", dashColor:"#d4b896", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-pill-center", label: "Pill Central", emoji: "🎯", segment: "universal",
-    description: "Pílula azul centralizada no meio da foto",
-    fn(w,h){ const bw=Math.round(w*.62),bh=Math.round(h*.13); return { box:{x:(w-bw)/2,y:h*.42,width:bw,height:bh,radius:bh/2,border_width:3,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:C.blue,bold:true,align:"center",opacity:1} }; },
+    id: "v3-dark", label: "Dark Navy", emoji: "⭐", segment: "v3",
+    description: "Pílula navy com sublinhado dourado — elegância noturna",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#0d1b3e",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bw=Math.round(w*.62),bh=Math.round(h*.13),bx=(w-bw)/2,by=h*.42,r=bh/2;
-      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=C.blue; ctx.fill();
-      ctx.lineWidth=3; ctx.strokeStyle=C.white; ctx.stroke();
-      nameText(ctx,name,w/2,by+bh/2,Math.round(h*.065),C.white);
+      ctx.fillStyle="rgba(0,0,0,.22)"; ctx.fillRect(0,0,w,h);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#0d1b3e", nameColor:"#ffffff", underColor:"#f59e0b", dashColor:"#94a3b8", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-obrigado", label: "Cartão Obrigado", emoji: "💙", segment: "universal",
-    description: "Card branco centralizado com agradecimento",
-    fn(w,h){ const bw=w*.78,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:16,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.075),font_color:C.blue,bg_color:"#fff",bold:true,align:"center",opacity:.95} }; },
+    id: "v3-blue", label: "Blue Bold", emoji: "⭐", segment: "v3",
+    description: "Pílula azul vibrante com sublinhado âmbar",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#1d4ed8",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      ctx.save(); ctx.globalAlpha=.95; rRect(ctx,bx,by,bw,bh,16); ctx.fillStyle=C.white; ctx.fill(); ctx.restore();
-      subText(ctx,"Obrigado pela visita,",w/2,by+bh*.28,Math.round(h*.038),C.gray);
-      nameText(ctx,name,w/2,by+bh*.57,Math.round(h*.075),C.blue);
-      subText(ctx,"Sua opinião faz a diferença. Avalie!",w/2,by+bh*.82,Math.round(h*.033),C.gold);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#1d4ed8", nameColor:"#ffffff", underColor:"#fbbf24", dashColor:"#93c5fd", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-assinatura", label: "Assinatura", emoji: "✍️", segment: "universal",
-    description: "Nome elegante no canto inferior direito",
-    fn(w,h){ const bw=w*.44,bh=h*.115,bx=w-bw-w*.04,by=h-bh-h*.05; return { box:{x:bx,y:by,width:bw,height:bh,radius:4,border_width:0,border_color:C.blue}, text:{font_size:Math.round(h*.052),font_color:C.navy,bg_color:C.slate,bold:false,align:"center",opacity:.96} }; },
+    id: "v3-rose", label: "Rose", emoji: "⭐", segment: "v3",
+    description: "Pílula rosé com sublinhado vermelho — beleza e estética",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#881337",bg_color:"#fff1f2",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bw=w*.44,bh=h*.115,bx=w-bw-w*.04,by=h-bh-h*.05;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,4); ctx.fillStyle=C.slate; ctx.fill(); ctx.restore();
-      ctx.fillStyle=C.blue; ctx.fillRect(bx,by,4,bh);
-      subText(ctx,name,bx+bw/2+2,by+bh/2,Math.round(h*.052),C.navy);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#fff1f2", nameColor:"#881337", underColor:"#f43f5e", dashColor:"#fda4af", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-banner-topo", label: "Banner Topo", emoji: "📰", segment: "universal",
-    description: "Faixa azul no topo com nome e chamada",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.16),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:C.blue,bold:true,align:"center",opacity:1} }; },
+    id: "v3-teal", label: "Teal", emoji: "⭐", segment: "v3",
+    description: "Pílula verde-água com sublinhado amarelo — saúde",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#0f766e",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bh=Math.round(h*.16); ctx.fillStyle=C.blue; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+", avalie nossa empresa! ⭐",w/2,bh/2,Math.round(h*.065),C.white);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#0f766e", nameColor:"#ffffff", underColor:"#fde047", dashColor:"#5eead4", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-dupla", label: "Dupla Linha", emoji: "📝", segment: "universal",
-    description: "Nome + chamada em caixa slate na base",
-    fn(w,h){ const bw=w*.7,bh=h*.22; return { box:{x:(w-bw)/2,y:h*.76,width:bw,height:bh,radius:14,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.068),font_color:C.navy,bg_color:C.slate,bold:true,align:"center",opacity:.97} }; },
+    id: "v3-slate", label: "Slate", emoji: "⭐", segment: "v3",
+    description: "Pílula slate escuro com sublinhado âmbar — moderno",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#f1f5f9",bg_color:"#1e293b",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bw=w*.7,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-      ctx.save(); ctx.globalAlpha=.97; rRect(ctx,bx,by,bw,bh,14); ctx.fillStyle=C.slate; ctx.fill(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.068),C.navy);
-      subText(ctx,"Sua opinião importa muito ❤️",w/2,by+bh*.72,Math.round(h*.035),C.blue);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#1e293b", nameColor:"#f1f5f9", underColor:"#d97706", dashColor:"#64748b", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-highlight", label: "Highlight", emoji: "✨", segment: "universal",
-    description: "Overlay escuro + nome iluminado no centro",
-    fn(w,h){ const bw=w*.65,bh=h*.23; return { box:{x:(w-bw)/2,y:h*.38,width:bw,height:bh,radius:10,border_width:2,border_color:C.blue}, text:{font_size:Math.round(h*.08),font_color:"#fff",bg_color:C.navy,bold:true,align:"center",opacity:.92} }; },
+    id: "v3-ivory", label: "Ivory", emoji: "⭐", segment: "v3",
+    description: "Pílula marfim com sublinhado mel — sofisticado",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#78350f",bg_color:"#faf7f2",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      ctx.fillStyle="rgba(10,17,40,.52)"; ctx.fillRect(0,0,w,h);
-      const bw=w*.65,bh=h*.23,bx=(w-bw)/2,by=h*.38;
-      ctx.save(); ctx.globalAlpha=.92; rRect(ctx,bx,by,bw,bh,10); ctx.fillStyle=C.navy; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle=C.blue; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.38,Math.round(h*.08),C.white);
-      subText(ctx,"Conta pra gente como foi!",w/2,by+bh*.75,Math.round(h*.032),"#93c5fd");
+      drawV3Badge(ctx, w, h, name, { pillBg:"#faf7f2", nameColor:"#78350f", underColor:"#b45309", dashColor:"#d4b896", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
   {
-    id: "u-badge-lat", label: "Badge Lateral", emoji: "🔖", segment: "universal",
-    description: "Faixa vertical azul na esquerda com nome rotacionado",
-    fn(w,h){ const bw=Math.round(w*.18); return { box:{x:0,y:0,width:bw,height:h,radius:0,border_width:0,border_color:C.blue}, text:{font_size:Math.round(h*.054),font_color:"#fff",bg_color:C.blue,bold:true,align:"center",opacity:1} }; },
+    id: "v3-green", label: "Verde", emoji: "⭐", segment: "v3",
+    description: "Pílula verde com sublinhado menta — natureza",
+    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#15803d",bold:true,align:"center",opacity:1} }; },
     draw(ctx, w, h, name) {
-      const bw=Math.round(w*.18); ctx.fillStyle=C.blue; ctx.fillRect(0,0,bw,h);
-      ctx.save(); ctx.translate(bw/2,h/2); ctx.rotate(-Math.PI/2);
-      subText(ctx,name+" — Avalie!",0,0,Math.round(h*.054),C.white);
-      ctx.restore();
-    }
-  },
-  // ─── CLÍNICAS ─────────────────────────────────────────────────────────────────
-  {
-    id: "cl-confianca", label: "Confiança", emoji: "🏥", segment: "clinica",
-    description: "Gradiente teal na base — saúde e confiança",
-    fn(w,h){ const bh=h*.22,by=h-bh; return { box:{x:0,y:by,width:w,height:bh,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.075),font_color:"#fff",bg_color:C.teal,bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.22,by=h-bh;
-      const grd=ctx.createLinearGradient(0,by,0,h);
-      grd.addColorStop(0,"rgba(13,148,136,0)"); grd.addColorStop(1,"rgba(13,148,136,.92)");
-      ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-      subText(ctx,"Obrigado por confiar em nossa equipe,",w/2,by+bh*.32,Math.round(h*.036),C.white);
-      nameText(ctx,name,w/2,by+bh*.65,Math.round(h*.075),C.white);
-      subText(ctx,"Deixe sua avaliação ⭐",w/2,by+bh*.88,Math.round(h*.03),"#99f6e4");
-    }
-  },
-  {
-    id: "cl-saude", label: "Cuidado", emoji: "❤️", segment: "clinica",
-    description: "Card branco com emoji de clínica e nome em teal",
-    fn(w,h){ const bw=w*.8,bh=h*.3; return { box:{x:(w-bw)/2,y:h*.33,width:bw,height:bh,radius:18,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:C.teal,bg_color:"#fff",bold:true,align:"center",opacity:.94} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.8,bh=h*.3,bx=(w-bw)/2,by=h*.33;
-      ctx.save(); ctx.globalAlpha=.94; rRect(ctx,bx,by,bw,bh,18); ctx.fillStyle=C.white; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.07)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("🏥",w/2,by+bh*.25);
-      nameText(ctx,name,w/2,by+bh*.55,Math.round(h*.07),C.teal);
-      subText(ctx,"Como foi sua consulta? Avalie!",w/2,by+bh*.82,Math.round(h*.033),C.gray);
-    }
-  },
-  {
-    id: "cl-missao", label: "Nossa Missão", emoji: "💚", segment: "clinica",
-    description: "Banner topo gradiente teal com frase da clínica",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.055),font_color:"#fff",bg_color:C.teal,bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.17);
-      const grd=ctx.createLinearGradient(0,0,0,bh);
-      grd.addColorStop(0,C.teal); grd.addColorStop(1,"#065f46");
-      ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" — Sua saúde, nossa missão ❤️",w/2,bh/2,Math.round(h*.055),C.white);
-    }
-  },
-  {
-    id: "cl-consulta", label: "Pós-consulta", emoji: "📋", segment: "clinica",
-    description: "Card com borda teal — confirmação pós-consulta",
-    fn(w,h){ const bw=w*.72,bh=h*.26; return { box:{x:(w-bw)/2,y:h*.38,width:bw,height:bh,radius:12,border_width:2,border_color:C.teal}, text:{font_size:Math.round(h*.075),font_color:C.teal,bg_color:"#fff",bold:true,align:"center",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.72,bh=h*.26,bx=(w-bw)/2,by=h*.38;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,12); ctx.fillStyle=C.white; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle=C.teal; ctx.stroke(); ctx.restore();
-      subText(ctx,"Sua consulta foi concluída,",w/2,by+bh*.25,Math.round(h*.035),C.gray);
-      nameText(ctx,name,w/2,by+bh*.56,Math.round(h*.075),C.teal);
-      subText(ctx,"Avalie nosso atendimento ⭐",w/2,by+bh*.82,Math.round(h*.032),C.gold);
-    }
-  },
-  {
-    id: "cl-estrelas", label: "5 Estrelas", emoji: "⭐", segment: "clinica",
-    description: "Rodapé teal com nome e incentivo à avaliação",
-    fn(w,h){ return { box:{x:0,y:h*.8,width:w,height:h*.2,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.058),font_color:"#fff",bg_color:C.teal,bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.2,by=h-bh; ctx.fillStyle=C.teal; ctx.fillRect(0,by,w,bh);
-      nameText(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),C.white);
-      subText(ctx,"Como foi seu atendimento? Avalie! ⭐",w/2,by+bh*.72,Math.round(h*.032),"#99f6e4");
-    }
-  },
-  // ─── ACADEMIAS ────────────────────────────────────────────────────────────────
-  {
-    id: "ac-conquista", label: "Conquista", emoji: "💪", segment: "academia",
-    description: "Overlay dark com borda dourada — estilo fitness",
-    fn(w,h){ const bw=w*.72,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:6,border_width:2,border_color:"#facc15"}, text:{font_size:Math.round(h*.08),font_color:"#facc15",bg_color:"#111827",bold:true,align:"center",opacity:.95} }; },
-    draw(ctx, w, h, name) {
-      ctx.fillStyle="rgba(0,0,0,.48)"; ctx.fillRect(0,0,w,h);
-      const bw=w*.72,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      rRect(ctx,bx,by,bw,bh,6); ctx.fillStyle="#111827"; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle="#facc15"; ctx.stroke();
-      nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#facc15");
-      subText(ctx,"Você é parte da nossa família! 💪",w/2,by+bh*.68,Math.round(h*.034),C.white);
-      subText(ctx,"Avalie nossa academia ⭐",w/2,by+bh*.88,Math.round(h*.028),"#facc15");
-    }
-  },
-  {
-    id: "ac-energia", label: "Energia", emoji: "⚡", segment: "academia",
-    description: "Rodapé gradiente vermelho-laranja de alta energia",
-    fn(w,h){ return { box:{x:0,y:h*.82,width:w,height:h*.18,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:"#dc2626",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.18),by=h-bh;
-      const grd=ctx.createLinearGradient(0,by,w,by+bh);
-      grd.addColorStop(0,"#dc2626"); grd.addColorStop(1,"#ea580c");
-      ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-      nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.065),C.white);
-      subText(ctx,"Sua energia transforma! ⚡ Avalie-nos",w/2,by+bh*.75,Math.round(h*.032),"#fed7aa");
-    }
-  },
-  {
-    id: "ac-evolucao", label: "Evolução", emoji: "📈", segment: "academia",
-    description: "Card dark com emoji 💪 e nome em dourado",
-    fn(w,h){ const bw=w*.78,bh=h*.26; return { box:{x:(w-bw)/2,y:h*.37,width:bw,height:bh,radius:14,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.075),font_color:"#facc15",bg_color:"#111827",bold:true,align:"center",opacity:.94} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.26,bx=(w-bw)/2,by=h*.37;
-      ctx.save(); ctx.globalAlpha=.94; rRect(ctx,bx,by,bw,bh,14); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.065)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("💪",w/2,by+bh*.25);
-      nameText(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#facc15");
-      subText(ctx,"Avalie nossa evolução juntos!",w/2,by+bh*.84,Math.round(h*.03),"#9ca3af");
-    }
-  },
-  {
-    id: "ac-familia", label: "Família", emoji: "🏋️", segment: "academia",
-    description: "Banner topo vermelho — família da academia",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.052),font_color:"#fff",bg_color:"#dc2626",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.17); ctx.fillStyle="#dc2626"; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" — Sua opinião nos faz crescer!",w/2,bh/2,Math.round(h*.052),C.white);
-    }
-  },
-  {
-    id: "ac-resultado", label: "Resultado", emoji: "🏆", segment: "academia",
-    description: "Card dark dourado na base — resultado que fala",
-    fn(w,h){ const bw=w*.68,bh=h*.22; return { box:{x:(w-bw)/2,y:h*.76,width:bw,height:bh,radius:10,border_width:2,border_color:"#facc15"}, text:{font_size:Math.round(h*.068),font_color:"#facc15",bg_color:"#111827",bold:true,align:"center",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.68,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#111827"; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle="#facc15"; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.068),"#facc15");
-      subText(ctx,"🏆 Resultado que fala por si!",w/2,by+bh*.72,Math.round(h*.034),C.white);
-    }
-  },
-  // ─── PET SHOP ─────────────────────────────────────────────────────────────────
-  {
-    id: "pt-amor", label: "Amor Animal", emoji: "🐾", segment: "petshop",
-    description: "Rodapé rosa com mensagem de amor ao pet",
-    fn(w,h){ return { box:{x:0,y:h*.78,width:w,height:h*.22,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.072),font_color:"#fff",bg_color:"#f472b6",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.22,by=h-bh; ctx.fillStyle="#f472b6"; ctx.fillRect(0,by,w,bh);
-      subText(ctx,"Obrigado por cuidar tão bem do seu pet,",w/2,by+bh*.28,Math.round(h*.035),C.white);
-      nameText(ctx,name,w/2,by+bh*.6,Math.round(h*.072),C.white);
-      subText(ctx,"🐾 Deixe sua avaliação ⭐",w/2,by+bh*.87,Math.round(h*.03),"#fce7f3");
-    }
-  },
-  {
-    id: "pt-cuidado", label: "Cuidado Pet", emoji: "🐶", segment: "petshop",
-    description: "Card branco arredondado com emoji e nome em rosa",
-    fn(w,h){ const bw=w*.78,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:20,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.072),font_color:"#db2777",bg_color:"#fff",bold:true,align:"center",opacity:.94} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      ctx.save(); ctx.globalAlpha=.94; rRect(ctx,bx,by,bw,bh,20); ctx.fillStyle=C.white; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.07)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("🐾",w/2,by+bh*.24);
-      nameText(ctx,name,w/2,by+bh*.55,Math.round(h*.072),"#db2777");
-      subText(ctx,"Seu pet merece o melhor! Avalie-nos ⭐",w/2,by+bh*.82,Math.round(h*.03),C.gray);
-    }
-  },
-  {
-    id: "pt-familia", label: "Família Pet", emoji: "🐱", segment: "petshop",
-    description: "Banner topo gradiente rosa-roxo — família do pet",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.048),font_color:"#fff",bg_color:"#db2777",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.17);
-      const grd=ctx.createLinearGradient(0,0,w,0);
-      grd.addColorStop(0,"#db2777"); grd.addColorStop(1,"#9333ea");
-      ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" 🐾 — Obrigado por fazer parte da família!",w/2,bh/2,Math.round(h*.048),C.white);
-    }
-  },
-  {
-    id: "pt-servico", label: "Pós-serviço", emoji: "✂️", segment: "petshop",
-    description: "Card com borda rosa — banho e tosa concluído",
-    fn(w,h){ const bw=w*.74,bh=h*.25; return { box:{x:(w-bw)/2,y:h*.38,width:bw,height:bh,radius:14,border_width:2,border_color:"#f472b6"}, text:{font_size:Math.round(h*.075),font_color:"#db2777",bg_color:"#fff",bold:true,align:"center",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.74,bh=h*.25,bx=(w-bw)/2,by=h*.38;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,14); ctx.fillStyle=C.white; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
-      subText(ctx,"Banho & Tosa concluído! ✂️",w/2,by+bh*.27,Math.round(h*.038),C.gray);
-      nameText(ctx,name,w/2,by+bh*.57,Math.round(h*.075),"#db2777");
-      subText(ctx,"Como foi o serviço? Avalie ⭐",w/2,by+bh*.84,Math.round(h*.032),C.gold);
-    }
-  },
-  {
-    id: "pt-melhor", label: "Melhor Pet", emoji: "🏅", segment: "petshop",
-    description: "Rodapé roxo — destaque para o melhor cuidado",
-    fn(w,h){ return { box:{x:0,y:h*.8,width:w,height:h*.2,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.058),font_color:"#fff",bg_color:"#7e22ce",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.2,by=h-bh; ctx.fillStyle="#7e22ce"; ctx.fillRect(0,by,w,bh);
-      nameText(ctx,name+",",w/2,by+bh*.3,Math.round(h*.058),C.white);
-      subText(ctx,"Conte como foi o cuidado do seu pet 🐾",w/2,by+bh*.72,Math.round(h*.03),"#e9d5ff");
-    }
-  },
-  // ─── ESTÉTICA ─────────────────────────────────────────────────────────────────
-  {
-    id: "es-brilho", label: "Seu Brilho", emoji: "💅", segment: "estetica",
-    description: "Overlay dark com borda dourada — luxo e elegância",
-    fn(w,h){ const bw=w*.75,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.36,width:bw,height:bh,radius:16,border_width:1,border_color:"#d97706"}, text:{font_size:Math.round(h*.08),font_color:"#fde68a",bg_color:"#1c0a0a",bold:true,align:"center",opacity:.92} }; },
-    draw(ctx, w, h, name) {
-      ctx.fillStyle="rgba(0,0,0,.4)"; ctx.fillRect(0,0,w,h);
-      const bw=w*.75,bh=h*.28,bx=(w-bw)/2,by=h*.36;
-      ctx.save(); ctx.globalAlpha=.92; rRect(ctx,bx,by,bw,bh,16); ctx.fillStyle="#1c0a0a"; ctx.fill();
-      ctx.lineWidth=1; ctx.strokeStyle="#d97706"; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.08),"#fde68a");
-      subText(ctx,"você merece todo esse brilho ✨",w/2,by+bh*.66,Math.round(h*.036),C.white);
-      subText(ctx,"Avalie nossa experiência ⭐",w/2,by+bh*.88,Math.round(h*.028),"#d97706");
-    }
-  },
-  {
-    id: "es-experiencia", label: "Experiência", emoji: "✨", segment: "estetica",
-    description: "Gradiente rosa na base — experiência de beleza",
-    fn(w,h){ const bh=h*.22,by=h-bh; return { box:{x:0,y:by,width:w,height:bh,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.072),font_color:"#fff",bg_color:"#db2777",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.22,by=h-bh;
-      const grd=ctx.createLinearGradient(0,by,0,h);
-      grd.addColorStop(0,"rgba(219,39,119,0)"); grd.addColorStop(1,"rgba(219,39,119,.9)");
-      ctx.fillStyle=grd; ctx.fillRect(0,by,w,bh);
-      subText(ctx,"Como foi sua experiência conosco,",w/2,by+bh*.3,Math.round(h*.036),C.white);
-      nameText(ctx,name,w/2,by+bh*.62,Math.round(h*.072),C.white);
-      subText(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.88,Math.round(h*.03),"#fce7f3");
-    }
-  },
-  {
-    id: "es-exclusivo", label: "Exclusividade", emoji: "👑", segment: "estetica",
-    description: "Card creme com coroa — tratamento exclusivo",
-    fn(w,h){ const bw=w*.78,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:20,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.072),font_color:"#92400e",bg_color:"#fff7ed",bold:true,align:"center",opacity:.95} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      ctx.save(); ctx.globalAlpha=.95; rRect(ctx,bx,by,bw,bh,20); ctx.fillStyle="#fff7ed"; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.065)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("👑",w/2,by+bh*.24);
-      nameText(ctx,name,w/2,by+bh*.55,Math.round(h*.072),"#92400e");
-      subText(ctx,"tratamento de excelência para você!",w/2,by+bh*.82,Math.round(h*.032),C.amber);
-    }
-  },
-  {
-    id: "es-relaxa", label: "Relaxamento", emoji: "🧘", segment: "estetica",
-    description: "Banner topo gradiente roxo-rosa — spa e relaxamento",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.046),font_color:"#fff",bg_color:"#7c3aed",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.17);
-      const grd=ctx.createLinearGradient(0,0,w,0);
-      grd.addColorStop(0,"#7c3aed"); grd.addColorStop(1,"#db2777");
-      ctx.fillStyle=grd; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" 🧘 — Como foi seu momento de relaxamento?",w/2,bh/2,Math.round(h*.046),C.white);
-    }
-  },
-  {
-    id: "es-autocuidado", label: "Autocuidado", emoji: "🌸", segment: "estetica",
-    description: "Card rosé na base com borda suave — autocuidado",
-    fn(w,h){ const bw=w*.72,bh=h*.22; return { box:{x:(w-bw)/2,y:h*.76,width:bw,height:bh,radius:12,border_width:1.5,border_color:"#f472b6"}, text:{font_size:Math.round(h*.068),font_color:"#be185d",bg_color:"#fff0f6",bold:true,align:"center",opacity:.97} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.72,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-      ctx.save(); ctx.globalAlpha=.97; rRect(ctx,bx,by,bw,bh,12); ctx.fillStyle="#fff0f6"; ctx.fill();
-      ctx.lineWidth=1.5; ctx.strokeStyle="#f472b6"; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#be185d");
-      subText(ctx,"🌸 Autocuidado que você merece. Avalie!",w/2,by+bh*.73,Math.round(h*.033),"#db2777");
-    }
-  },
-  // ─── JURÍDICO ─────────────────────────────────────────────────────────────────
-  {
-    id: "ju-confianca", label: "Confiança", emoji: "⚖️", segment: "juridico",
-    description: "Overlay navy com card dark — seriedade jurídica",
-    fn(w,h){ const bw=w*.74,bh=h*.26; return { box:{x:(w-bw)/2,y:h*.37,width:bw,height:bh,radius:6,border_width:1,border_color:"#94a3b8"}, text:{font_size:Math.round(h*.078),font_color:"#fff",bg_color:"#0f172a",bold:true,align:"center",opacity:.95} }; },
-    draw(ctx, w, h, name) {
-      ctx.fillStyle="rgba(10,17,40,.5)"; ctx.fillRect(0,0,w,h);
-      const bw=w*.74,bh=h*.26,bx=(w-bw)/2,by=h*.37;
-      ctx.save(); ctx.globalAlpha=.95; rRect(ctx,bx,by,bw,bh,6); ctx.fillStyle="#0f172a"; ctx.fill();
-      ctx.lineWidth=1; ctx.strokeStyle="#94a3b8"; ctx.stroke(); ctx.restore();
-      subText(ctx,"Foi um prazer atendê-lo,",w/2,by+bh*.28,Math.round(h*.036),"#94a3b8");
-      nameText(ctx,name,w/2,by+bh*.58,Math.round(h*.078),C.white);
-      subText(ctx,"Sua avaliação fortalece nossa reputação.",w/2,by+bh*.84,Math.round(h*.03),"#64748b");
-    }
-  },
-  {
-    id: "ju-reputacao", label: "Reputação", emoji: "🏛️", segment: "juridico",
-    description: "Rodapé dark com linha divisória — reputação sólida",
-    fn(w,h){ return { box:{x:0,y:h*.8,width:w,height:h*.2,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#fff",bg_color:"#0f172a",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.2,by=h-bh; ctx.fillStyle="#0f172a"; ctx.fillRect(0,by,w,bh);
-      ctx.lineWidth=1; ctx.strokeStyle="#334155";
-      ctx.beginPath(); ctx.moveTo(0,by); ctx.lineTo(w,by); ctx.stroke();
-      nameText(ctx,name,w/2,by+bh*.35,Math.round(h*.062),C.white);
-      subText(ctx,"⚖️ Avalie nosso atendimento — sua opinião importa",w/2,by+bh*.72,Math.round(h*.03),"#94a3b8");
-    }
-  },
-  {
-    id: "ju-sessao", label: "Pós-sessão", emoji: "🧠", segment: "juridico",
-    description: "Card branco com emoji 🧠 — pós-sessão de terapia",
-    fn(w,h){ const bw=w*.78,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:14,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.068),font_color:"#7c3aed",bg_color:"#fff",bold:true,align:"center",opacity:.95} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      ctx.save(); ctx.globalAlpha=.95; rRect(ctx,bx,by,bw,bh,14); ctx.fillStyle=C.white; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.062)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("🧠",w/2,by+bh*.23);
-      subText(ctx,"Obrigado pela sessão,",w/2,by+bh*.5,Math.round(h*.036),C.gray);
-      nameText(ctx,name,w/2,by+bh*.73,Math.round(h*.068),"#7c3aed");
-      subText(ctx,"Deixe seu feedback ⭐",w/2,by+bh*.91,Math.round(h*.028),C.gold);
-    }
-  },
-  {
-    id: "ju-elegante", label: "Elegante", emoji: "🖋️", segment: "juridico",
-    description: "Banner topo dark elegante — confiança no trabalho",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.15),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.046),font_color:"#e2e8f0",bg_color:"#1e293b",bold:false,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.15); ctx.fillStyle="#1e293b"; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" — Obrigado pela confiança em nosso trabalho.",w/2,bh/2,Math.round(h*.046),"#e2e8f0");
-    }
-  },
-  {
-    id: "ju-parceria", label: "Parceria", emoji: "🤝", segment: "juridico",
-    description: "Card dark com borda roxa na base — parceria de resultados",
-    fn(w,h){ const bw=w*.7,bh=h*.22; return { box:{x:(w-bw)/2,y:h*.76,width:bw,height:bh,radius:8,border_width:1.5,border_color:"#7c3aed"}, text:{font_size:Math.round(h*.068),font_color:"#fff",bg_color:"#0f172a",bold:true,align:"center",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.7,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,8); ctx.fillStyle="#0f172a"; ctx.fill();
-      ctx.lineWidth=1.5; ctx.strokeStyle="#7c3aed"; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.34,Math.round(h*.068),C.white);
-      subText(ctx,"🤝 Parceria que constrói resultados. Avalie!",w/2,by+bh*.73,Math.round(h*.032),"#a78bfa");
-    }
-  },
-  // ─── SERVIÇOS ─────────────────────────────────────────────────────────────────
-  {
-    id: "sv-resolvido", label: "Problema Resolvido", emoji: "✅", segment: "servicos",
-    description: "Rodapé verde — serviço concluído com sucesso",
-    fn(w,h){ return { box:{x:0,y:h*.78,width:w,height:h*.22,radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.072),font_color:"#fff",bg_color:C.green,bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=h*.22,by=h-bh; ctx.fillStyle=C.green; ctx.fillRect(0,by,w,bh);
-      subText(ctx,"✅ Serviço concluído com sucesso,",w/2,by+bh*.28,Math.round(h*.036),C.white);
-      nameText(ctx,name,w/2,by+bh*.6,Math.round(h*.072),C.white);
-      subText(ctx,"Como avalia nosso trabalho? ⭐",w/2,by+bh*.87,Math.round(h*.03),"#bbf7d0");
-    }
-  },
-  {
-    id: "sv-seguranca", label: "Segurança", emoji: "🛡️", segment: "servicos",
-    description: "Card branco com escudo — segurança residencial",
-    fn(w,h){ const bw=w*.78,bh=h*.28; return { box:{x:(w-bw)/2,y:h*.35,width:bw,height:bh,radius:14,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.073),font_color:C.green,bg_color:"#fff",bold:true,align:"center",opacity:.94} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=h*.28,bx=(w-bw)/2,by=h*.35;
-      ctx.save(); ctx.globalAlpha=.94; rRect(ctx,bx,by,bw,bh,14); ctx.fillStyle=C.white; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(h*.065)}px sans-serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("🛡️",w/2,by+bh*.24);
-      nameText(ctx,name,w/2,by+bh*.54,Math.round(h*.073),C.green);
-      subText(ctx,"Sua casa protegida. Avalie nosso serviço!",w/2,by+bh*.82,Math.round(h*.032),C.gray);
-    }
-  },
-  {
-    id: "sv-qualidade", label: "Qualidade", emoji: "🔧", segment: "servicos",
-    description: "Banner topo verde — serviço de qualidade",
-    fn(w,h){ return { box:{x:0,y:0,width:w,height:Math.round(h*.17),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.052),font_color:"#fff",bg_color:C.green,bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bh=Math.round(h*.17); ctx.fillStyle=C.green; ctx.fillRect(0,0,w,bh);
-      subText(ctx,name+" — Serviço de qualidade ✔",w/2,bh/2,Math.round(h*.052),C.white);
-    }
-  },
-  {
-    id: "sv-alivio", label: "Alívio", emoji: "😌", segment: "servicos",
-    description: "Overlay com card verde dark — problema resolvido!",
-    fn(w,h){ const bw=w*.68,bh=h*.24; return { box:{x:(w-bw)/2,y:h*.38,width:bw,height:bh,radius:10,border_width:2,border_color:C.green}, text:{font_size:Math.round(h*.078),font_color:"#4ade80",bg_color:"#052e16",bold:true,align:"center",opacity:.93} }; },
-    draw(ctx, w, h, name) {
-      ctx.fillStyle="rgba(0,0,0,.45)"; ctx.fillRect(0,0,w,h);
-      const bw=w*.68,bh=h*.24,bx=(w-bw)/2,by=h*.38;
-      ctx.save(); ctx.globalAlpha=.93; rRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#052e16"; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle=C.green; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.38,Math.round(h*.078),"#4ade80");
-      subText(ctx,"Problema resolvido! 😌 Avalie-nos!",w/2,by+bh*.75,Math.round(h*.034),C.white);
-    }
-  },
-  {
-    id: "sv-profissional", label: "Profissional", emoji: "👷", segment: "servicos",
-    description: "Card verde dark na base — feito por profissionais",
-    fn(w,h){ const bw=w*.7,bh=h*.22; return { box:{x:(w-bw)/2,y:h*.76,width:bw,height:bh,radius:10,border_width:2,border_color:"#4ade80"}, text:{font_size:Math.round(h*.068),font_color:"#4ade80",bg_color:"#052e16",bold:true,align:"center",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.7,bh=h*.22,bx=(w-bw)/2,by=h*.76;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,10); ctx.fillStyle="#052e16"; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle="#4ade80"; ctx.stroke(); ctx.restore();
-      nameText(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#4ade80");
-      subText(ctx,"👷 Feito por profissionais. Avalie ⭐",w/2,by+bh*.73,Math.round(h*.032),C.white);
-    }
-  },
-
-  // ── SÉRIE V2: Caixa sólida + ícone + nome — estilo moderno ───────────────────
-  {
-    id: "v2-dark-base", label: "V2 Dark Pill", emoji: "⬛", segment: "universal", v2: true,
-    description: "Pílula dark na base com ícone ⭐ — moderno, limpo",
-    fn(w,h){ const bw=w*.78,bh=Math.round(h*.14); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:bh/2,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:"#0d0d0d",bold:true,align:"left",opacity:.93} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=Math.round(h*.14),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
-      ctx.save(); ctx.globalAlpha=.93; rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0d0d0d"; ctx.fill(); ctx.restore();
-      const fs=Math.round(h*.065),iS=Math.round(h*.055),pad=Math.round(bw*.07);
-      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("⭐",bx+pad,by+bh/2);
-      ctx.font=`bold ${fs}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+8,by+bh/2);
-    }
-  },
-  {
-    id: "v2-white-card", label: "V2 White Card", emoji: "⬜", segment: "universal", v2: true,
-    description: "Card branco sólido com underline azul — clean e profissional",
-    fn(w,h){ const bw=w*.76,bh=Math.round(h*.13); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:12,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#111827",bg_color:"#fff",bold:true,align:"left",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.76,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=12;
-      ctx.save(); ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=18; rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-      const fs=Math.round(h*.062),pad=Math.round(bw*.06);
-      ctx.font=`bold ${fs}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
-      ctx.fillText(name,bx+pad,by+bh*.5);
-      const tw=ctx.measureText(name).width;
-      ctx.fillStyle=C.blue; ctx.fillRect(bx+pad,by+bh*.8,Math.min(tw,bw*.55),3);
-    }
-  },
-  {
-    id: "v2-brand-pill", label: "V2 Brand Pill", emoji: "🔵", segment: "clinica", v2: true,
-    description: "Pílula azul com ícone de coração — clínicas",
-    fn(w,h){ const bw=w*.74,bh=Math.round(h*.13); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:bh/2,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.06),font_color:"#fff",bg_color:C.blue,bold:true,align:"left",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.74,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
-      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=C.blue; ctx.fill();
-      const fs=Math.round(h*.06),pad=Math.round(bw*.07),iS=Math.round(h*.055);
-      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("❤️",bx+pad,by+bh/2);
-      ctx.font=`bold ${fs}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+10,by+bh/2);
-    }
-  },
-  {
-    id: "v2-icon-chip", label: "V2 Pet Chip", emoji: "🐾", segment: "petshop", v2: true,
-    description: "Chip escuro com ícone de pata — petshop",
-    fn(w,h){ const bh=Math.round(h*.125); return { box:{x:0,y:h-bh-h*.05,width:0,height:bh,radius:10,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:"#111827",bold:true,align:"left",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const pad=32,iS=Math.round(h*.07),gap=12,bh=Math.round(h*.125);
-      ctx.font=`bold ${Math.round(h*.065)}px system-ui,-apple-system,sans-serif`;
-      const tw=ctx.measureText(name).width;
-      const bw=iS+gap+tw+pad*2,bx=(w-bw)/2,by=h-bh-h*.05,r=10;
-      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
-      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("🐾",bx+pad,by+bh/2);
-      ctx.font=`bold ${Math.round(h*.065)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
-    }
-  },
-  {
-    id: "v2-nicho-academia", label: "V2 Academia", emoji: "💪", segment: "academia", v2: true,
-    description: "Gradiente azul-escuro com ícone 💪 — academias",
-    fn(w,h){ const bh=Math.round(h*.12); return { box:{x:0,y:h-bh-h*.05,width:0,height:bh,radius:8,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#fff",bg_color:"#1d4ed8",bold:true,align:"left",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const pad=28,iS=Math.round(h*.065),gap=10,bh=Math.round(h*.12);
-      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`;
-      const tw=ctx.measureText(name).width;
-      const bw=iS+gap+tw+pad*2,bx=(w-bw)/2,by=h-bh-h*.05,r=8;
-      const grd=ctx.createLinearGradient(bx,by,bx+bw,by); grd.addColorStop(0,"#1d4ed8"); grd.addColorStop(1,"#111827");
-      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=grd; ctx.fill();
-      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#facc15"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("💪",bx+pad,by+bh/2);
-      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
-    }
-  },
-  {
-    id: "v2-accent-estetica", label: "V2 Estética", emoji: "💅", segment: "estetica", v2: true,
-    description: "Card branco com bloco de destaque rosa — estética",
-    fn(w,h){ const bh=Math.round(h*.125),bw=w*.78; return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:10,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#111827",bg_color:"#fff",bold:true,align:"left",opacity:.96} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.78,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10;
-      const acW=Math.round(bh*.9),acX=bx,acY=by+(bh-acW)/2;
-      ctx.save(); rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
-      ctx.save(); rRect(ctx,acX,acY,acW,acW,r); ctx.fillStyle="#db2777"; ctx.fill(); ctx.restore();
-      ctx.font=`${Math.round(acW*.6)}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("💅",acX+acW/2,acY+acW/2);
-      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
-      ctx.fillText(name,acX+acW+16,by+bh/2);
-    }
-  },
-  {
-    id: "v2-split-juridico", label: "V2 Jurídico", emoji: "⚖️", segment: "juridico", v2: true,
-    description: "Card dark com ícone + separador vertical — advocacia",
-    fn(w,h){ const bw=w*.76,bh=Math.round(h*.125); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:10,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.058),font_color:"#fff",bg_color:"#0f172a",bold:true,align:"left",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const bw=w*.76,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10;
-      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0f172a"; ctx.fill();
-      const iS=Math.round(h*.06),pad=Math.round(bh*.18),sepX=bx+pad+iS+pad*.8;
-      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("⚖️",bx+pad+iS/2,by+bh/2);
-      ctx.strokeStyle="rgba(255,255,255,.2)"; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(sepX,by+bh*.2); ctx.lineTo(sepX,by+bh*.8); ctx.stroke();
-      ctx.font=`bold ${Math.round(h*.058)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
-      ctx.fillText(name,sepX+14,by+bh/2);
-    }
-  },
-  {
-    id: "v2-nicho-servicos", label: "V2 Serviços", emoji: "🏠", segment: "servicos", v2: true,
-    description: "Chip verde com ícone de casa — serviços residenciais",
-    fn(w,h){ const bh=Math.round(h*.12); return { box:{x:0,y:h-bh-h*.05,width:0,height:bh,radius:8,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#fff",bg_color:"#16a34a",bold:true,align:"left",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      const pad=26,iS=Math.round(h*.065),gap=12,bh=Math.round(h*.12);
-      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`;
-      const tw=ctx.measureText(name).width;
-      const bw=iS+gap+tw+pad*2,bx=(w-bw)/2,by=h-bh-h*.05,r=8;
-      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#16a34a"; ctx.fill();
-      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("🏠",bx+pad,by+bh/2);
-      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+      drawV3Badge(ctx, w, h, name, { pillBg:"#15803d", nameColor:"#ffffff", underColor:"#bbf7d0", dashColor:"#86efac", starBubbleBg:"#ffffff", yPos:0.72 });
     }
   },
 ];
@@ -1274,7 +870,6 @@ function filterPresets() {
     if (!preset) return;
     let show;
     if (selectedSegment === "all") show = true;
-    else if (selectedSegment === "v2") show = !!preset.v2;
     else show = preset.segment === selectedSegment;
     card.classList.toggle("hidden", !show);
   });
