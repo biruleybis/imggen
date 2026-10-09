@@ -917,8 +917,9 @@ async function selectTemplate(slug) {
 function loadConfig(cfg) {
   document.getElementById("tplLabelInput").value = cfg.label || "";
 
-  // Font style
-  const fid = cfg.preset_id || null;
+  // Font style — only keep preset_id if it matches a known FONT_STYLES entry (ignore old v3-* IDs)
+  const rawFid = cfg.preset_id || null;
+  const fid = rawFid && FONT_STYLES.find(f => f.id === rawFid) ? rawFid : null;
   appliedFontId  = fid;
   selectedFontId = fid;
 
@@ -996,18 +997,23 @@ async function uploadPhoto(input) {
 async function saveTemplate() {
   if (!currentSlug) return toast("Selecione um template", "error");
 
+  const pxSize = parseInt(document.getElementById("sFontSize").value) || 52;
+  // Store font size as fraction of display height so server can scale to real image height
+  const font_size_pct = imgDisplayH > 0 ? pxSize / imgDisplayH : null;
+
   const body = {
-    label:       document.getElementById("tplLabelInput").value || currentSlug,
-    preset_id:   appliedFontId || null,
-    font_family: document.getElementById("sFontFamily").value,
-    font_size:   parseInt(document.getElementById("sFontSize").value) || 52,
-    font_color:  document.getElementById("sFontColor").value,
-    bold:        manualBold,
-    italic:      manualItalic,
-    shadow:      document.getElementById("sShadow").checked,
-    underline:   document.getElementById("sUnderline").checked,
-    text_x_pct:  textXPct,
-    text_y_pct:  textYPct,
+    label:          document.getElementById("tplLabelInput").value || currentSlug,
+    preset_id:      appliedFontId || null,
+    font_family:    document.getElementById("sFontFamily").value,
+    font_size:      pxSize,
+    font_size_pct:  font_size_pct,
+    font_color:     document.getElementById("sFontColor").value,
+    bold:           manualBold,
+    italic:         manualItalic,
+    shadow:         document.getElementById("sShadow").checked,
+    underline:      document.getElementById("sUnderline").checked,
+    text_x_pct:     textXPct,
+    text_y_pct:     textYPct,
   };
 
   const res = await fetch(`/api/templates/${currentSlug}`, {

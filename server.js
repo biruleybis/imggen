@@ -496,8 +496,9 @@ app.get("/render", renderLimiter, async (req, res) => {
     // Draw base photo
     ctx.drawImage(baseImage, 0, 0);
 
-    // If preset is stored, use V3 badge preset renderer (may be async)
-    const presetFn = cfg.preset_id && PRESETS[cfg.preset_id];
+    // If preset is stored AND it's a known V3 badge preset, use badge renderer
+    // (font style IDs like "dancing", "great-vibes" etc. are NOT presets — ignore them here)
+    const presetFn = cfg.preset_id && cfg.preset_id.startsWith("v3-") && PRESETS[cfg.preset_id];
     if (presetFn) {
       await presetFn(ctx, W, H, displayName);
     } else if (cfg.font_family || cfg.text_x_pct != null) {
@@ -506,7 +507,10 @@ app.get("/render", renderLimiter, async (req, res) => {
       const yPct   = cfg.text_y_pct ?? 0.72;
       const tx     = Math.round(W * xPct);
       const ty     = Math.round(H * yPct);
-      const fs     = cfg.font_size   ?? Math.round(H * 0.09);
+      // Use font_size_pct (fraction of image height) when available for accurate scaling
+      const fs     = cfg.font_size_pct != null
+        ? Math.round(H * cfg.font_size_pct)
+        : (cfg.font_size ?? Math.round(H * 0.09));
       const color  = cfg.font_color  ?? "#0d1b3e";
       const family = cfg.font_family ?? "Georgia, serif";
       const bold   = cfg.bold   ? "bold"   : "normal";
