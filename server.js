@@ -8,81 +8,60 @@ const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 const { Resend } = require("resend");
 
-// ── Atlas Data API ────────────────────────────────────────────────────────────
-const MONGODB_APP_ID  = process.env.MONGODB_APP_ID;
-const MONGODB_API_KEY = process.env.MONGODB_API_KEY;
+// ── MongoDB driver ────────────────────────────────────────────────────────────
+const { MongoClient } = require("mongodb");
+const MONGO_URI = process.env.MONGODB_URI;
+let db = null;
 
-const ATLAS_BASE = MONGODB_APP_ID
-  ? `https://data.mongodb-api.com/app/${MONGODB_APP_ID}/endpoint/data/v1`
-  : null;
-
-const ATLAS_HEADERS = {
-  "Content-Type": "application/json",
-  "api-key": MONGODB_API_KEY || "",
-};
-
-const ATLAS_DS   = "Review-Growth";
-const ATLAS_DB   = "imggen";
-const ATLAS_COLL = "templates";
-
-function useAtlas() {
-  return !!(ATLAS_BASE && MONGODB_API_KEY);
-}
-
-async function atlasRequest(action, body) {
-  const url = `${ATLAS_BASE}/action/${action}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: ATLAS_HEADERS,
-    body: JSON.stringify({
-      dataSource: ATLAS_DS,
-      database:   ATLAS_DB,
-      collection: ATLAS_COLL,
-      ...body,
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Atlas API ${action} failed (${res.status}): ${text}`);
+async function connectMongo() {
+  if (!MONGO_URI) {
+    console.warn("MONGODB_URI not set — using local filesystem only");
+    return;
   }
-  return res.json();
+  try {
+    const client = new MongoClient(MONGO_URI, {
+      serverSelectionTimeoutMS: 15000,
+      connectTimeoutMS: 15000,
+      socketTimeoutMS: 30000,
+      tls: true,
+      tlsInsecure: true,
+    });
+    await client.connect();
+    db = client.db("imggen");
+    await db.collection("templates").createIndex({ slug: 1 }, { unique: true });
+    console.log("MongoDB connected ✓");
+  } catch (e) {
+    console.error("MongoDB connection failed:", e.message);
+    db = null;
+  }
 }
 
-// ── Config helpers (Atlas Data API + filesystem fallback) ─────────────────────
+// ── Config helpers (MongoDB + filesystem fallback) ────────────────────────────
 async function readConfigAsync(slug) {
-  if (useAtlas()) {
-    const data = await atlasRequest("findOne", { filter: { slug } });
-    if (data && data.document) {
-      const doc = data.document;
-      delete doc._id;
-      return doc;
-    }
+  if (db) {
+    const doc = await db.collection("templates").findOne({ slug });
+    if (doc) { delete doc._id; return doc; }
     return null;
   }
-  // fallback: filesystem
   const p = configPath(slug);
   if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8"));
   return null;
 }
 
 async function writeConfigAsync(slug, data) {
-  if (useAtlas()) {
-    await atlasRequest("updateOne", {
-      filter: { slug },
-      update: { $set: { ...data, slug } },
-      upsert: true,
-    });
+  if (db) {
+    await db.collection("templates").updateOne(
+      { slug },
+      { $set: { ...data, slug } },
+      { upsert: true }
+    );
   }
-  // always write local too (so /render can use filesystem if Atlas is down)
   writeConfig(slug, data);
 }
 
 async function listTemplatesAsync() {
-  if (useAtlas()) {
-    const data = await atlasRequest("find", {
-      projection: { slug: 1, label: 1 },
-    });
-    const docs = (data && data.documents) ? data.documents : [];
+  if (db) {
+    const docs = await db.collection("templates").find({}, { projection: { slug: 1, label: 1 } }).toArray();
     return docs.map(d => ({ slug: d.slug, label: d.label || d.slug }));
   }
   // fallback: filesystem
@@ -97,10 +76,9 @@ async function listTemplatesAsync() {
 }
 
 async function deleteTemplateAsync(slug) {
-  if (useAtlas()) {
-    await atlasRequest("deleteOne", { filter: { slug } });
+  if (db) {
+    await db.collection("templates").deleteOne({ slug });
   }
-  // also delete local files
   const dir = templateDir(slug);
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
 }
@@ -738,37 +716,14 @@ app.get("/render", renderLimiter, async (req, res) => {
 });
 
 // ── Health check ──────────────────────────────────────────────────────────────
-app.get("/health", async (req, res) => {
-  let mongoOk = false;
-  let mongoError = null;
-
-  if (useAtlas()) {
-    try {
-      // Real ping: findOne on a document that won't exist — just tests connectivity
-      await atlasRequest("findOne", { filter: { _health_ping: true } });
-      mongoOk = true;
-    } catch (e) {
-      mongoError = e.message;
-    }
-  }
-
-  res.json({
-    status: "ok",
-    version: "3.0.0",
-    mongo: mongoOk,
-    mongoConfigured: useAtlas(),
-    ...(mongoError ? { mongoError } : {}),
-  });
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", version: "3.0.0", mongo: !!db });
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────────
-if (useAtlas()) {
-  console.log(`Atlas Data API configured — App ID: ${MONGODB_APP_ID}`);
-} else {
-  console.warn("MONGODB_APP_ID / MONGODB_API_KEY not set — using local filesystem only");
-}
-
-app.listen(PORT, () => {
-  console.log(`ImgReview v3.0 running on port ${PORT}`);
-  console.log(`Storage: ${useAtlas() ? "Atlas Data API" : "filesystem fallback"}`);
+connectMongo().then(() => {
+  app.listen(PORT, () => {
+    console.log(`ImgReview v3.0 running on port ${PORT}`);
+    console.log(`Storage: ${db ? "MongoDB" : "filesystem fallback"}`);
+  });
 });
