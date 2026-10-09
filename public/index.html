@@ -6,7 +6,7 @@
 <title>ImgReview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@700&family=Sacramento&family=Satisfy&family=Playfair+Display:ital,wght@0,700;1,700&family=Cormorant+Garamond:ital,wght@1,700&family=Cinzel:wght@700&family=Pacifico&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,13 +23,12 @@
   --success: #22c55e;
   --radius:  10px;
   --sidebar: 252px;
-  --panel:   296px;
+  --panel:   300px;
   --tr: 150ms ease;
 }
 
 html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); font-size: 13px; }
 
-/* ── Layout ── */
 .app { display: flex; height: 100vh; }
 
 /* ── Sidebar ── */
@@ -40,9 +39,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
   display: flex; flex-direction: column;
   flex-shrink: 0; overflow: hidden;
 }
-
 .sidebar-head { padding: 18px 14px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
-
 .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .logo-mark {
   width: 26px; height: 26px; background: var(--blue); border-radius: 7px;
@@ -51,7 +48,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 }
 .logo-text { font-size: 14px; font-weight: 700; letter-spacing: -.3px; }
 .logo-text span { color: var(--blue); }
-
 .btn-new {
   width: 100%; padding: 8px 10px;
   background: var(--blue); color: #fff; border: none; border-radius: 8px;
@@ -60,11 +56,9 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
   transition: background var(--tr);
 }
 .btn-new:hover { background: var(--blue-dk); }
-
 .template-list { flex: 1; overflow-y: auto; padding: 6px; }
 .template-list::-webkit-scrollbar { width: 3px; }
 .template-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
-
 .tpl-item {
   display: flex; align-items: center; gap: 9px;
   padding: 8px 9px; border-radius: 8px; cursor: pointer;
@@ -73,11 +67,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 .tpl-item:hover { background: rgba(255,255,255,.05); }
 .tpl-item.active { background: rgba(37,99,235,.18); }
 .tpl-item.active .tpl-name { color: var(--blue); }
-
-.tpl-thumb {
-  width: 32px; height: 32px; border-radius: 5px;
-  background: var(--navy-3); overflow: hidden; flex-shrink: 0;
-}
+.tpl-thumb { width: 32px; height: 32px; border-radius: 5px; background: var(--navy-3); overflow: hidden; flex-shrink: 0; }
 .tpl-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .tpl-name { font-size: 12px; font-weight: 500; flex: 1; color: var(--slate-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tpl-del {
@@ -88,12 +78,10 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 }
 .tpl-item:hover .tpl-del { opacity: 1; }
 .tpl-del:hover { background: rgba(239,68,68,.15); }
-
 .sidebar-foot { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,.07); font-size: 10px; color: var(--slate-3); text-align: center; }
 
 /* ── Canvas area ── */
 .canvas-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0b1327; }
-
 .canvas-toolbar {
   height: 46px; display: flex; align-items: center; padding: 0 14px; gap: 8px;
   border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
@@ -125,11 +113,8 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 }
 .canvas-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
 .canvas-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
-
 .canvas-wrap { position: relative; display: inline-block; flex-shrink: 0; }
-
-#baseImg { display: block; max-width: 100%; border-radius: 8px; user-select: none; -webkit-user-drag: none; }
-
+#baseImg { display: block; max-width: 760px; border-radius: 8px; user-select: none; -webkit-user-drag: none; }
 .empty-canvas {
   width: 580px; height: 360px; border: 2px dashed rgba(255,255,255,.12); border-radius: 12px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
@@ -139,29 +124,43 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 .empty-canvas span { font-weight: 500; font-size: 13px; }
 .empty-canvas small { font-size: 11px; opacity: .7; }
 
-#boxCanvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+/* Name overlay */
+#nameOverlay {
+  position: absolute;
+  cursor: move;
+  user-select: none;
+  white-space: nowrap;
+  display: none;
+  line-height: 1;
+  padding: 2px 0;
+}
+#nameOverlay.visible { display: block; }
 
-.box-overlay {
-  position: absolute; border: 2px solid var(--blue); cursor: move;
-  user-select: none; display: none;
+/* SVG underline */
+#underlineSvg {
+  position: absolute;
+  pointer-events: none;
+  display: none;
+  overflow: visible;
 }
-.box-overlay.visible { display: block; }
+#underlineSvg.visible { display: block; }
 
-.resize-se {
-  position: absolute; right: -5px; bottom: -5px; width: 11px; height: 11px;
-  background: var(--white); border: 2px solid var(--blue); border-radius: 2px; cursor: se-resize; z-index: 2;
+/* Drag hint */
+.drag-hint {
+  position: absolute;
+  bottom: 10px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.55); color: rgba(255,255,255,.8);
+  font-size: 11px; padding: 4px 12px; border-radius: 20px;
+  pointer-events: none;
+  transition: opacity .4s;
 }
-.resize-e {
-  position: absolute; right: -5px; top: calc(50% - 5px); width: 11px; height: 11px;
-  background: var(--white); border: 2px solid var(--blue); border-radius: 2px; cursor: e-resize; z-index: 2;
-}
+.drag-hint.hidden { opacity: 0; }
 
 /* ── Right panel ── */
 .right-panel {
   width: var(--panel); background: var(--navy); border-left: 1px solid rgba(255,255,255,.07);
   display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
 }
-
 .panel-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
 .panel-tab {
   flex: 1; padding: 11px 0; text-align: center; font-size: 11px; font-weight: 600;
@@ -169,56 +168,45 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
   transition: color var(--tr), border-color var(--tr);
 }
 .panel-tab.active { color: var(--white); border-color: var(--blue); }
-
 .panel-body {
   flex: 1; overflow-y: auto; padding: 14px;
-  display: flex; flex-direction: column; gap: 18px;
+  display: flex; flex-direction: column; gap: 14px;
 }
 .panel-body::-webkit-scrollbar { width: 3px; }
 .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
 
-.panel-section { display: flex; flex-direction: column; gap: 8px; }
-.section-title { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--slate-3); }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--slate-3); margin-bottom: 6px; }
 
-.field { display: flex; flex-direction: column; gap: 3px; }
-.field label { font-size: 11px; font-weight: 500; color: var(--slate-3); }
-.field input[type="number"],
-.field input[type="text"],
-.field select {
-  padding: 6px 9px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 7px; color: var(--white); font-family: inherit; font-size: 12px;
-  outline: none; width: 100%; transition: border-color var(--tr);
+/* ── Font gallery ── */
+.font-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.font-card {
+  background: var(--navy-2); border-radius: 8px; overflow: hidden;
+  cursor: pointer; border: 2px solid transparent;
+  transition: border-color var(--tr), transform var(--tr);
+  width: 128px; height: 80px; position: relative; flex-shrink: 0;
 }
-.field input:focus, .field select:focus { border-color: var(--blue); }
-.field select option { background: var(--navy-2); }
-.field-row { display: flex; gap: 7px; }
-.field-row .field { flex: 1; }
+.font-card:hover { border-color: rgba(37,99,235,.5); transform: translateY(-1px); }
+.font-card.selected { border-color: var(--blue); }
+.font-card canvas { display: block; width: 128px; height: 80px; }
 
-input[type="color"] {
-  -webkit-appearance: none; width: 100%; height: 32px;
-  border: 1px solid rgba(255,255,255,.1); border-radius: 7px;
-  cursor: pointer; background: transparent; padding: 2px; outline: none;
+.font-gallery-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 4px;
 }
-input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
-
-.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
-.toggle-label { font-size: 12px; font-weight: 500; }
-.toggle { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
-.toggle input { display: none; }
-.toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,.15); border-radius: 20px; cursor: pointer; transition: background var(--tr); }
-.toggle input:checked + .toggle-track { background: var(--blue); }
-.toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform var(--tr); pointer-events: none; }
-.toggle input:checked ~ .toggle-thumb { transform: translateX(16px); }
-
-.align-btns { display: flex; gap: 5px; }
-.align-btn {
-  flex: 1; padding: 6px 0; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 6px; color: var(--slate-3); font-size: 11px; font-weight: 600;
-  cursor: pointer; text-align: center; transition: all var(--tr);
+.link-manual {
+  font-size: 11px; color: var(--blue); cursor: pointer; text-decoration: none;
+  background: none; border: none; font-family: inherit; padding: 0;
 }
-.align-btn.active, .align-btn:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+.link-manual:hover { text-decoration: underline; }
+.btn-use-font {
+  padding: 7px 14px; background: var(--blue); border: none; color: #fff;
+  border-radius: 7px; font-family: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background var(--tr);
+}
+.btn-use-font:hover:not(:disabled) { background: var(--blue-dk); }
+.btn-use-font:disabled { opacity: .4; cursor: not-allowed; }
 
+/* Upload zone */
 .upload-zone {
   border: 2px dashed rgba(255,255,255,.12); border-radius: 7px; padding: 12px;
   text-align: center; cursor: pointer; transition: border-color var(--tr), background var(--tr);
@@ -229,19 +217,28 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
 .upload-zone-text { font-size: 12px; color: var(--slate-3); pointer-events: none; }
 .upload-zone-sub { font-size: 10px; color: rgba(148,163,184,.5); margin-top: 1px; pointer-events: none; }
 
-.icon-preview-row {
-  display: flex; align-items: center; gap: 8px; padding: 7px;
-  background: rgba(255,255,255,.05); border-radius: 7px;
+/* ── Estilo tab fields ── */
+.field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.field label { font-size: 11px; font-weight: 500; color: var(--slate-3); }
+.field select, .field input[type="text"] {
+  padding: 6px 9px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 7px; color: var(--white); font-family: inherit; font-size: 12px;
+  outline: none; width: 100%; transition: border-color var(--tr);
 }
-.icon-preview-img { width: 32px; height: 32px; object-fit: contain; border-radius: 3px; }
-.icon-preview-name { font-size: 11px; color: var(--slate-2); flex: 1; }
-.btn-icon-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding: 2px 5px; border-radius: 3px; }
-.btn-icon-del:hover { background: rgba(239,68,68,.12); }
+.field select:focus, .field input:focus { border-color: var(--blue); }
+.field select option { background: var(--navy-2); }
+
+input[type="color"] {
+  -webkit-appearance: none; width: 100%; height: 32px;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 7px;
+  cursor: pointer; background: transparent; padding: 2px; outline: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
 
 .range-row { display: flex; align-items: center; gap: 8px; }
 .range-row input[type="range"] { flex: 1; }
 .range-val { font-size: 11px; color: var(--slate-2); min-width: 30px; text-align: right; }
-
 input[type="range"] {
   width: 100%; -webkit-appearance: none; height: 3px;
   background: rgba(255,255,255,.15); border-radius: 3px; outline: none; cursor: pointer;
@@ -251,54 +248,22 @@ input[type="range"]::-webkit-slider-thumb {
   background: var(--blue); border-radius: 50%; border: 2px solid var(--white);
 }
 
-/* ── Segment filter ── */
-.segment-filter {
-  display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px;
-}
-.seg-pill {
-  padding: 4px 9px; border-radius: 20px; font-size: 10px; font-weight: 600;
-  cursor: pointer; border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.05); color: var(--slate-3);
-  transition: all var(--tr); white-space: nowrap;
-}
-.seg-pill:hover { border-color: rgba(37,99,235,.5); color: var(--white); }
-.seg-pill.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+.toggle-label { font-size: 12px; font-weight: 500; }
+.toggle { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+.toggle input { display: none; }
+.toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,.15); border-radius: 20px; cursor: pointer; transition: background var(--tr); }
+.toggle input:checked + .toggle-track { background: var(--blue); }
+.toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform var(--tr); pointer-events: none; }
+.toggle input:checked ~ .toggle-thumb { transform: translateX(16px); }
 
-/* ── Preset templates grid ── */
-.presets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.preset-card.hidden { display: none; }
-
-.preset-card {
-  border-radius: 8px; overflow: hidden; cursor: pointer; position: relative;
-  border: 2px solid transparent; transition: border-color var(--tr), transform var(--tr);
-  background: var(--navy-3); aspect-ratio: 4/3;
+.toggle-btn-row { display: flex; gap: 6px; }
+.toggle-btn {
+  flex: 1; padding: 6px 0; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px; color: var(--slate-3); font-size: 11px; font-weight: 700;
+  cursor: pointer; text-align: center; transition: all var(--tr);
 }
-.preset-card:hover { border-color: rgba(37,99,235,.6); transform: translateY(-1px); }
-.preset-card.selected { border-color: var(--blue); }
-
-.preset-canvas { display: block; width: 100%; height: 100%; }
-
-.preset-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,.7));
-  padding: 14px 6px 5px; font-size: 10px; font-weight: 600;
-  color: #fff; text-align: center;
-}
-
-.preset-check {
-  position: absolute; top: 5px; right: 5px; width: 16px; height: 16px;
-  background: var(--blue); border-radius: 50%; display: none;
-  align-items: center; justify-content: center; font-size: 9px;
-}
-.preset-card.selected .preset-check { display: flex; }
-
-.btn-apply-preset {
-  width: 100%; padding: 9px; background: var(--blue); border: none; color: #fff;
-  border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: background var(--tr); display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-.btn-apply-preset:hover { background: var(--blue-dk); }
-.btn-apply-preset:disabled { opacity: .4; cursor: not-allowed; }
+.toggle-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
 /* URL tab */
 .url-block {
@@ -328,6 +293,12 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .btn-save:hover { background: var(--blue-dk); }
 .btn-save:disabled { opacity: .5; cursor: not-allowed; }
+.btn-save-outline {
+  width: 100%; padding: 10px; background: rgba(37,99,235,.18); color: var(--blue);
+  border: 1px solid var(--blue); border-radius: var(--radius); font-family: inherit; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: all var(--tr);
+}
+.btn-save-outline:hover { background: var(--blue); color: #fff; }
 
 /* Toast */
 .toast {
@@ -385,7 +356,7 @@ input[type="range"]::-webkit-slider-thumb {
     </button>
   </div>
   <div class="template-list" id="tplList"></div>
-  <div class="sidebar-foot">ImgReview v2.0 · Review Growth</div>
+  <div class="sidebar-foot">ImgReview v3.0 · Review Growth</div>
 </aside>
 
 <!-- ── Canvas ── -->
@@ -394,24 +365,22 @@ input[type="range"]::-webkit-slider-thumb {
     <input class="tpl-label-input" id="tplLabelInput" type="text" placeholder="Nome do template..." oninput="onLabelInput()">
     <div class="toolbar-sep"></div>
     <span class="preview-name-label">Prévia:</span>
-    <input class="preview-name-input" id="previewName" type="text" value="João" oninput="drawBoxPreview()">
+    <input class="preview-name-input" id="previewName" type="text" value="Andressa" oninput="onNameInput()">
     <button class="btn-render" onclick="openRendered()">Ver resultado</button>
   </div>
 
   <div class="canvas-scroll">
     <div class="canvas-wrap" id="canvasWrap">
-      <div class="empty-canvas" id="emptyCanvas" onclick="document.getElementById('photoUpload').click()">
+      <div class="empty-canvas" id="emptyCanvas" onclick="document.getElementById('photoUploadEmpty').click()">
         <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity=".35"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
         <span>Clique para fazer upload da foto</span>
         <small>JPG, PNG ou WebP</small>
-        <input type="file" id="photoUpload" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
+        <input type="file" id="photoUploadEmpty" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
       </div>
-      <img id="baseImg" style="display:none" onload="onImgLoad()" ondragstart="return false">
-      <canvas id="boxCanvas" style="position:absolute;top:0;left:0;pointer-events:none;display:none"></canvas>
-      <div class="box-overlay" id="boxOverlay">
-        <div class="resize-e" id="resizeE"></div>
-        <div class="resize-se" id="resizeSE"></div>
-      </div>
+      <img id="baseImg" style="display:none" onload="onImgLoad()" ondragstart="return false" alt="">
+      <div id="nameOverlay"></div>
+      <svg id="underlineSvg" width="200" height="20"><path id="underlinePath" d="" fill="none" stroke="#c8a882" stroke-width="2" stroke-linecap="round"/></svg>
+      <div class="drag-hint" id="dragHint">arraste o nome</div>
     </div>
   </div>
 </main>
@@ -419,161 +388,118 @@ input[type="range"]::-webkit-slider-thumb {
 <!-- ── Right panel ── -->
 <aside class="right-panel">
   <div class="panel-tabs">
-    <div class="panel-tab active" onclick="switchTab('presets')">Presets</div>
-    <div class="panel-tab" onclick="switchTab('design')">Design</div>
-    <div class="panel-tab" onclick="switchTab('urls')">URLs</div>
+    <div class="panel-tab active" data-tab="fontes" onclick="switchTab('fontes')">Fontes</div>
+    <div class="panel-tab" data-tab="estilo" onclick="switchTab('estilo')">Estilo</div>
+    <div class="panel-tab" data-tab="urls" onclick="switchTab('urls')">URLs</div>
   </div>
 
-  <!-- PRESETS TAB -->
-  <div class="panel-body" id="tabPresets">
-    <div class="panel-section">
-      <div class="section-title">Foto de fundo</div>
+  <!-- FONTES TAB -->
+  <div class="panel-body" id="tabFontes">
+    <div>
+      <div class="section-title">Upload da foto</div>
       <div class="upload-zone" onclick="document.getElementById('photoUploadPanel').click()">
         <input type="file" id="photoUploadPanel" accept="image/*" onchange="uploadPhoto(this)">
-        <div class="upload-zone-text">📷 Upload / Trocar foto</div>
-        <div class="upload-zone-sub">JPG, PNG · máx 10MB</div>
+        <div class="upload-zone-text">Trocar foto</div>
+        <div class="upload-zone-sub">JPG, PNG · max 10MB</div>
       </div>
     </div>
 
-    <div class="panel-section">
-      <div class="section-title">Escolha o estilo visual</div>
-      <div class="segment-filter" id="segmentFilter"></div>
-      <div class="presets-grid" id="presetsGrid"></div>
+    <div>
+      <div class="section-title">Escolha o estilo da fonte</div>
+      <div class="font-gallery" id="fontGallery"></div>
     </div>
 
-    <button class="btn-apply-preset" id="btnApplyPreset" onclick="applyPreset()" disabled>
-      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-      Aplicar estilo
-    </button>
+    <div class="font-gallery-footer">
+      <button class="link-manual" onclick="switchTab('estilo')">Modo manual →</button>
+      <button class="btn-use-font" id="btnUseFont" onclick="applySelectedFont()" disabled>Usar esta fonte</button>
+    </div>
 
-    <button class="btn-save" onclick="saveTemplate()" style="background:rgba(37,99,235,.25);border:1px solid var(--blue)">Salvar Template</button>
+    <button class="btn-save-outline" onclick="saveTemplate()">Salvar Template</button>
   </div>
 
-  <!-- DESIGN TAB -->
-  <div class="panel-body" id="tabDesign" style="display:none">
-
-    <div class="panel-section">
-      <div class="section-title">Foto de fundo</div>
-      <div class="upload-zone" onclick="document.getElementById('photoUploadDesign').click()">
-        <input type="file" id="photoUploadDesign" accept="image/*" onchange="uploadPhoto(this)">
-        <div class="upload-zone-text">📷 Trocar foto</div>
-        <div class="upload-zone-sub">JPG, PNG · máx 10MB</div>
-      </div>
-    </div>
-
-    <div class="panel-section">
-      <div class="section-title">Posição da caixa</div>
-      <div class="field-row">
-        <div class="field"><label>X</label><input type="number" id="fX" oninput="onPropChange()"></div>
-        <div class="field"><label>Y</label><input type="number" id="fY" oninput="onPropChange()"></div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Largura</label><input type="number" id="fW" oninput="onPropChange()"></div>
-        <div class="field"><label>Altura</label><input type="number" id="fH" oninput="onPropChange()"></div>
-      </div>
-    </div>
-
-    <div class="panel-section">
-      <div class="section-title">Estilo da caixa</div>
-      <div class="field"><label>Cor de fundo</label><input type="color" id="fBgColor" value="#ffffff" oninput="drawBoxPreview()"></div>
+  <!-- ESTILO TAB -->
+  <div class="panel-body" id="tabEstilo" style="display:none">
+    <div>
+      <div class="section-title">Fonte</div>
       <div class="field">
-        <label>Arredondamento (px)</label>
+        <label>Família</label>
+        <select id="sFontFamily" onchange="applyManualStyle()">
+          <option value="Great Vibes">Great Vibes</option>
+          <option value="Dancing Script">Dancing Script</option>
+          <option value="Sacramento">Sacramento</option>
+          <option value="Satisfy">Satisfy</option>
+          <option value="Playfair Display">Playfair Display</option>
+          <option value="Cormorant Garamond">Cormorant Garamond</option>
+          <option value="Cinzel">Cinzel</option>
+          <option value="Pacifico">Pacifico</option>
+          <option value="Josefin Sans">Josefin Sans</option>
+          <option value="Inter">Inter</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tamanho — <span id="sFontSizeVal">52</span>px</label>
         <div class="range-row">
-          <input type="range" id="fRadius" min="0" max="60" value="12" oninput="onRadiusChange(this)">
-          <span class="range-val" id="radiusVal">12</span>
+          <input type="range" id="sFontSize" min="16" max="140" value="52" oninput="onFontSizeChange(this)">
         </div>
       </div>
       <div class="field">
-        <label>Opacidade</label>
-        <div class="range-row">
-          <input type="range" id="fOpacity" min="0" max="100" value="100" oninput="onOpacityChange(this)">
-          <span class="range-val" id="opacityVal">100%</span>
-        </div>
+        <label>Cor</label>
+        <input type="color" id="sFontColor" value="#1a1a2e" oninput="applyManualStyle()">
+      </div>
+      <div class="toggle-btn-row" style="margin-bottom:8px">
+        <button class="toggle-btn" id="btnBold" onclick="toggleStyle('bold')">N</button>
+        <button class="toggle-btn" id="btnItalic" onclick="toggleStyle('italic')">I</button>
       </div>
     </div>
 
-    <div class="panel-section">
-      <div class="section-title">Borda</div>
-      <div class="field-row">
-        <div class="field"><label>Espessura</label><input type="number" id="fBorderW" value="0" min="0" max="20" oninput="drawBoxPreview()"></div>
-        <div class="field"><label>Cor</label><input type="color" id="fBorderColor" value="#2563EB" oninput="drawBoxPreview()"></div>
-      </div>
-    </div>
-
-    <div class="panel-section">
-      <div class="section-title">Texto</div>
-      <div class="field-row">
-        <div class="field"><label>Tamanho</label><input type="number" id="fFontSize" value="40" min="12" max="120" oninput="drawBoxPreview()"></div>
-        <div class="field"><label>Cor</label><input type="color" id="fFontColor" value="#2563EB" oninput="drawBoxPreview()"></div>
-      </div>
-      <div class="field">
-        <label>Alinhamento</label>
-        <div class="align-btns">
-          <button class="align-btn" data-align="left" onclick="setAlign('left',this)">Esq</button>
-          <button class="align-btn active" data-align="center" onclick="setAlign('center',this)">Centro</button>
-          <button class="align-btn" data-align="right" onclick="setAlign('right',this)">Dir</button>
-        </div>
+    <div>
+      <div class="section-title">Efeitos</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Sombra no texto</span>
+        <label class="toggle">
+          <input type="checkbox" id="sShadow" onchange="applyManualStyle()">
+          <div class="toggle-track"></div><div class="toggle-thumb"></div>
+        </label>
       </div>
       <div class="toggle-row">
-        <span class="toggle-label">Negrito</span>
+        <span class="toggle-label">Sublinhado elegante</span>
         <label class="toggle">
-          <input type="checkbox" id="fBold" checked onchange="drawBoxPreview()">
+          <input type="checkbox" id="sUnderline" onchange="applyManualStyle()">
           <div class="toggle-track"></div><div class="toggle-thumb"></div>
         </label>
       </div>
     </div>
 
-    <div class="panel-section">
-      <div class="section-title">Ícone</div>
-      <div id="iconPreviewRow" style="display:none" class="icon-preview-row">
-        <img class="icon-preview-img" id="iconPreviewImg">
-        <span class="icon-preview-name" id="iconPreviewName"></span>
-        <button class="btn-icon-del" onclick="deleteIcon()">✕</button>
-      </div>
-      <div class="upload-zone" id="iconUploadZone">
-        <input type="file" id="iconUpload" accept="image/png,image/svg+xml,image/jpeg" onchange="uploadIcon(this)">
-        <div class="upload-zone-text">🖼 Upload de ícone</div>
-        <div class="upload-zone-sub">PNG, SVG · posicionado à esquerda</div>
-      </div>
-      <div class="field" id="iconSizeField" style="display:none">
-        <label>Tamanho do ícone (px)</label>
-        <div class="range-row">
-          <input type="range" id="fIconSize" min="16" max="120" value="40" oninput="onIconSizeChange(this)">
-          <span class="range-val" id="iconSizeVal">40</span>
-        </div>
-      </div>
-    </div>
-
-    <button class="btn-save" id="btnSave" onclick="saveTemplate()">Salvar Template</button>
+    <button class="btn-save" onclick="saveTemplate()">Salvar Template</button>
   </div>
 
   <!-- URLS TAB -->
   <div class="panel-body" id="tabUrls" style="display:none">
-    <div class="panel-section">
-      <div class="section-title">Configuração</div>
+    <div>
+      <div class="section-title">Configuracao</div>
       <div class="field">
-        <label>Domínio / IP do VPS</label>
+        <label>Dominio / IP do VPS</label>
         <input type="text" id="vpsHost" placeholder="ex: 198.51.100.42" oninput="updateURLs()">
       </div>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="url-block">
-        <div class="url-block-label">🔗 Worker URL (GHL)</div>
+        <div class="url-block-label">Worker URL (GHL)</div>
         <div class="url-copy-row">
           <div class="url-text" id="workerUrl">Selecione um template</div>
           <button class="btn-copy" onclick="copyURL('workerUrl',this)">Copiar</button>
         </div>
       </div>
       <div class="url-block">
-        <div class="url-block-label">⚙️ API direta (VPS)</div>
+        <div class="url-block-label">API direta (VPS)</div>
         <div class="url-copy-row">
           <div class="url-text" id="apiUrl">—</div>
           <button class="btn-copy" onclick="copyURL('apiUrl',this)">Copiar</button>
         </div>
       </div>
       <div class="url-block">
-        <div class="url-block-label">🖼 Link de prévia</div>
+        <div class="url-block-label">Link de previa</div>
         <div class="url-copy-row">
           <div class="url-text" id="previewUrl">—</div>
           <button class="btn-copy" onclick="copyURL('previewUrl',this)">Copiar</button>
@@ -584,7 +510,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div style="font-size:10px;color:var(--slate-3);line-height:1.6">
       Use a <strong style="color:var(--slate-2)">Worker URL</strong> no template do WhatsApp no GHL com
       <code style="background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px">{{contact.first_name}}</code>
-      no parâmetro <code style="background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px">name</code>.
+      no parametro <code style="background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px">name</code>.
     </div>
   </div>
 </aside>
@@ -605,371 +531,352 @@ input[type="range"]::-webkit-slider-thumb {
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Worker domain (hardcoded — altere aqui quando mudar) ──────────────────────
+// ── Worker domain ─────────────────────────────────────────────────────────────
 const WORKER_DOMAIN = "imggen-worker.mentorbrunoribas.workers.dev";
 
+// ── Font style definitions ────────────────────────────────────────────────────
+const FONT_STYLES = [
+  { id: "great-vibes",      label: "Elegante Script",    family: "Great Vibes",        sizeMult: 1.4,  bold: false, italic: false, color: "#1a1a2e" },
+  { id: "dancing",          label: "Dancing Script",     family: "Dancing Script",     sizeMult: 1.2,  bold: true,  italic: false, color: "#0d1b3e" },
+  { id: "sacramento",       label: "Sacramento",         family: "Sacramento",         sizeMult: 1.5,  bold: false, italic: false, color: "#2d1b00" },
+  { id: "satisfy",          label: "Satisfy",            family: "Satisfy",            sizeMult: 1.1,  bold: false, italic: false, color: "#1a1a2e" },
+  { id: "playfair",         label: "Playfair Display",   family: "Playfair Display",   sizeMult: 1.0,  bold: true,  italic: false, color: "#0d1b3e" },
+  { id: "playfair-italic",  label: "Playfair Italic",    family: "Playfair Display",   sizeMult: 1.0,  bold: true,  italic: true,  color: "#2d1b00" },
+  { id: "cormorant",        label: "Cormorant Garamond", family: "Cormorant Garamond", sizeMult: 1.15, bold: true,  italic: true,  color: "#1a1a2e" },
+  { id: "cinzel",           label: "Cinzel",             family: "Cinzel",             sizeMult: 0.85, bold: true,  italic: false, color: "#0d1b3e" },
+  { id: "pacifico",         label: "Pacifico",           family: "Pacifico",           sizeMult: 0.9,  bold: false, italic: false, color: "#1a1a2e" },
+  { id: "josefin",          label: "Josefin Sans",       family: "Josefin Sans",       sizeMult: 0.95, bold: true,  italic: false, color: "#0d1b3e" },
+];
+
 // ── State ─────────────────────────────────────────────────────────────────────
-let currentSlug = null;
-let imgNaturalW = 0, imgNaturalH = 0, imgDisplayW = 0, imgDisplayH = 0;
-let isDragging = false, isResizingSE = false, isResizingE = false;
-let dragOffX = 0, dragOffY = 0;
-let resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
-let currentAlign = "center";
-let hasIcon = false;
-let selectedPresetId = null;
+let currentSlug     = null;
+let imgNaturalW     = 0;
+let imgNaturalH     = 0;
+let imgDisplayW     = 0;
+let imgDisplayH     = 0;
+let selectedFontId  = null;   // currently selected font card
+let appliedFontId   = null;   // the font that's actually live on the overlay
 
-// ── Segments ──────────────────────────────────────────────────────────────────
-const SEGMENTS = [
-  { id: "all",   label: "Todos",  emoji: "🔍" },
-  { id: "v3",    label: "V3 Badge", emoji: "⭐" },
-];
+// Text position as percentage of display size
+let textXPct = 0.5;
+let textYPct = 0.72;
 
-let selectedSegment = "all";
+// Manual style state (used when user directly edits Estilo tab)
+let manualBold   = false;
+let manualItalic = false;
 
-// ── Color palette ─────────────────────────────────────────────────────────────
-const C = {
-  blue:"#2563EB", navy:"#0A1128", white:"#ffffff", slate:"#F8FAFC",
-  gray:"#64748B", muted:"#94a3b8", gold:"#f59e0b", green:"#16a34a",
-  teal:"#0d9488", rose:"#e11d48", pink:"#db2777", purple:"#7c3aed",
-  amber:"#d97706", red:"#dc2626", sky:"#0284c7", warm:"#92400e",
-};
+// Dragging
+let isDraggingText = false;
+let dragTextOffX   = 0;
+let dragTextOffY   = 0;
 
-// ── V3 SVG assets (inline data URIs for browser canvas) ──────────────────────
-const GOOGLE_SVG_URI = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.86l6.1-6.1C34.46 2.99 29.5 1 24 1 14.82 1 6.98 6.48 3.25 14.27l7.1 5.52C12.18 13.42 17.64 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.64-.15-3.22-.42-4.75H24v9.5h12.67C35.53 33.27 32.3 36 28.3 37.3l7.08 5.5C40.41 38.48 46.5 32.13 46.5 24.5z"/><path fill="#FBBC05" d="M10.35 28.21A14.57 14.57 0 0 1 9.5 24c0-1.47.2-2.89.55-4.21l-7.1-5.52A23.97 23.97 0 0 0 0 24c0 3.87.92 7.53 2.56 10.77l7.79-6.56z"/><path fill="#34A853" d="M24 47c5.5 0 10.12-1.82 13.49-4.93l-7.08-5.5C28.64 37.97 26.45 38.5 24 38.5c-6.34 0-11.72-4.27-13.65-10.05l-7.79 6.56C6.8 41.48 14.72 47 24 47z"/></svg>`);
-const STAR_SVG_URI = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFD700" d="M24 4l5.5 11.1 12.3 1.8-8.9 8.6 2.1 12.2L24 31.9l-10.9 5.8 2.1-12.2-8.9-8.6 12.3-1.8z"/></svg>`);
-
-// Pre-load images once — redraw thumbnails when ready
-const _gImg = new Image();
-const _sImg = new Image();
-let _svgLoadedCount = 0;
-function _onSvgLoad() {
-  _svgLoadedCount++;
-  if (_svgLoadedCount >= 2) {
-    // Redraw all preset thumbs once both SVGs are loaded
-    if (typeof refreshAllPresetThumbs === "function") setTimeout(refreshAllPresetThumbs, 0);
-    if (typeof drawBoxPreview === "function") setTimeout(drawBoxPreview, 0);
-  }
-}
-_gImg.onload = _onSvgLoad; _gImg.src = GOOGLE_SVG_URI;
-_sImg.onload = _onSvgLoad; _sImg.src = STAR_SVG_URI;
-
-function drawDashes(ctx, cx, cy, count, len, gap, angle, color, lineW) {
-  ctx.save();
-  ctx.strokeStyle = color; ctx.lineWidth = lineW; ctx.lineCap = "round";
-  ctx.translate(cx, cy); ctx.rotate(angle);
-  for (let i = 0; i < count; i++) {
-    const ox = (i - (count-1)/2) * (len+gap);
-    ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox+len, 0); ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawV3Badge(ctx, w, h, name, opts) {
-  opts = opts || {};
-  const pillBg      = opts.pillBg      || "#ffffff";
-  const pillShadow  = opts.pillShadow  || "rgba(0,0,0,0.28)";
-  const nameColor   = opts.nameColor   || "#0d1b3e";
-  const underColor  = opts.underColor  || "#c8a882";
-  const dashColor   = opts.dashColor   || "#d4b896";
-  const starBubbleBg= opts.starBubbleBg|| "#ffffff";
-  const yPos        = opts.yPos        || 0.72;
-
-  const pilH = Math.round(h * 0.135);
-  const gSize = Math.round(pilH * 1.55);
-  const gR = gSize / 2;
-
-  const nameFs = Math.round(h * 0.095);
-  ctx.font = `bold ${nameFs}px Georgia, 'Times New Roman', serif`;
-  const nameW = ctx.measureText(name).width;
-
-  const innerPad = Math.round(pilH * 0.38);
-  const gGap = Math.round(gR * 0.55);
-  const pilW = gR + gGap + innerPad + nameW + innerPad;
-
-  const cx = w / 2 + gR * 0.3;
-  const cy = Math.round(h * yPos);
-  const pilX = cx - pilW / 2 + gR * 0.6;
-  const pilY = cy - pilH / 2;
-
-  // Decorative dashes
-  drawDashes(ctx, pilX - gR - 10, cy - pilH*0.6, 2, 14, 5, -0.5, dashColor, 3);
-  drawDashes(ctx, pilX - gR - 18, cy + pilH*0.3, 2, 10, 4, 0.3, dashColor, 2.5);
-  drawDashes(ctx, pilX + pilW + 12, cy - pilH*0.4, 2, 12, 4, 0.5, dashColor, 2.5);
-
-  // Google circle shadow + white bg
-  ctx.save();
-  ctx.shadowColor = pillShadow; ctx.shadowBlur = 18;
-  ctx.beginPath(); ctx.arc(pilX - gGap, cy, gR, 0, Math.PI*2);
-  ctx.fillStyle = "#ffffff"; ctx.fill();
-  ctx.restore();
-  // Google logo
-  if (_gImg.complete && _gImg.naturalWidth > 0) {
-    ctx.drawImage(_gImg, pilX-gGap - gR*0.6, cy - gR*0.6, gR*1.2, gR*1.2);
-  }
-
-  // Pill (rounded rect)
-  const pilR = pilH / 2;
-  ctx.save();
-  ctx.shadowColor = pillShadow; ctx.shadowBlur = 22;
-  rRect(ctx, pilX, pilY, pilW, pilH, pilR);
-  ctx.fillStyle = pillBg; ctx.fill();
-  ctx.restore();
-
-  // Name text
-  ctx.font = `bold ${nameFs}px Georgia, 'Times New Roman', serif`;
-  ctx.fillStyle = nameColor; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-  const nameX = pilX + gR + gGap*0.1 + innerPad*0.6;
-  ctx.fillText(name, nameX, cy);
-
-  // Curved underline
-  const underW = nameW * 0.85;
-  const underX = nameX + nameW * 0.05;
-  const underY = cy + nameFs * 0.55;
-  ctx.beginPath();
-  ctx.moveTo(underX, underY);
-  ctx.quadraticCurveTo(underX + underW/2, underY + nameFs*0.08, underX + underW, underY);
-  ctx.strokeStyle = underColor; ctx.lineWidth = Math.round(nameFs*0.055); ctx.lineCap = "round";
-  ctx.stroke();
-
-  // Star bubble
-  const sbSize = Math.round(gSize * 0.75);
-  const sbX = pilX + pilW - sbSize*0.15;
-  const sbY = pilY - sbSize*0.55;
-  ctx.save();
-  ctx.shadowColor = pillShadow; ctx.shadowBlur = 12;
-  ctx.beginPath(); ctx.arc(sbX, sbY, sbSize/2, 0, Math.PI*2);
-  ctx.fillStyle = starBubbleBg; ctx.fill();
-  ctx.restore();
-  if (_sImg.complete && _sImg.naturalWidth > 0) {
-    ctx.drawImage(_sImg, sbX - sbSize*0.38, sbY - sbSize*0.38, sbSize*0.76, sbSize*0.76);
-  }
-}
-
-// ── Rounded rect helper ───────────────────────────────────────────────────────
-function rRect(ctx, x, y, w, h, r) {
-  r = Math.min(r, w/2, h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y,x+w,y+r,r);
-  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
-  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
-}
-function nameText(ctx, name, cx, cy, fs, color, bold) {
-  ctx.font = `${bold!==false?"bold":"500"} ${fs}px Inter, sans-serif`;
-  ctx.fillStyle = color; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(name + "!", cx, cy);
-}
-function subText(ctx, text, cx, cy, fs, color) {
-  ctx.font = `500 ${fs}px Inter, sans-serif`;
-  ctx.fillStyle = color; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(text, cx, cy);
-}
-function starsRow(ctx, cx, cy, size, color) {
-  ctx.font = `${size}px sans-serif`; ctx.fillStyle = color||C.gold;
-  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("⭐⭐⭐⭐⭐", cx, cy);
-}
-
-// ── Preset definitions ────────────────────────────────────────────────────────
-const PRESETS = [
-  // ─── V3 BADGE PRESETS ────────────────────────────────────────────────────────
-  {
-    id: "v3-classic", label: "Classic", emoji: "⭐", segment: "v3",
-    description: "Pílula branca clássica com sublinhado caramelo",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#0d1b3e",bg_color:"#fff",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#ffffff", nameColor:"#0d1b3e", underColor:"#c8a882", dashColor:"#d4b896", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-dark", label: "Dark Navy", emoji: "⭐", segment: "v3",
-    description: "Pílula navy com sublinhado dourado — elegância noturna",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#0d1b3e",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      ctx.fillStyle="rgba(0,0,0,.22)"; ctx.fillRect(0,0,w,h);
-      drawV3Badge(ctx, w, h, name, { pillBg:"#0d1b3e", nameColor:"#ffffff", underColor:"#f59e0b", dashColor:"#94a3b8", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-blue", label: "Blue Bold", emoji: "⭐", segment: "v3",
-    description: "Pílula azul vibrante com sublinhado âmbar",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#1d4ed8",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#1d4ed8", nameColor:"#ffffff", underColor:"#fbbf24", dashColor:"#93c5fd", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-rose", label: "Rose", emoji: "⭐", segment: "v3",
-    description: "Pílula rosé com sublinhado vermelho — beleza e estética",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#881337",bg_color:"#fff1f2",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#fff1f2", nameColor:"#881337", underColor:"#f43f5e", dashColor:"#fda4af", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-teal", label: "Teal", emoji: "⭐", segment: "v3",
-    description: "Pílula verde-água com sublinhado amarelo — saúde",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#0f766e",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#0f766e", nameColor:"#ffffff", underColor:"#fde047", dashColor:"#5eead4", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-slate", label: "Slate", emoji: "⭐", segment: "v3",
-    description: "Pílula slate escuro com sublinhado âmbar — moderno",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#f1f5f9",bg_color:"#1e293b",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#1e293b", nameColor:"#f1f5f9", underColor:"#d97706", dashColor:"#64748b", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-ivory", label: "Ivory", emoji: "⭐", segment: "v3",
-    description: "Pílula marfim com sublinhado mel — sofisticado",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#78350f",bg_color:"#faf7f2",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#faf7f2", nameColor:"#78350f", underColor:"#b45309", dashColor:"#d4b896", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-  {
-    id: "v3-green", label: "Verde", emoji: "⭐", segment: "v3",
-    description: "Pílula verde com sublinhado menta — natureza",
-    fn(w,h){ return { box:{x:0,y:Math.round(h*.72),width:w,height:Math.round(h*.14),radius:0,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.07),font_color:"#ffffff",bg_color:"#15803d",bold:true,align:"center",opacity:1} }; },
-    draw(ctx, w, h, name) {
-      drawV3Badge(ctx, w, h, name, { pillBg:"#15803d", nameColor:"#ffffff", underColor:"#bbf7d0", dashColor:"#86efac", starBubbleBg:"#ffffff", yPos:0.72 });
-    }
-  },
-];
-
-function loadVpsHost() {
-  try {
-    const v = localStorage.getItem("imgreview_vps_host");
-    if (v) { document.getElementById("vpsHost").value = v; updateURLs(); }
-  } catch(e) {}
-}
-
-// ── Segment filter ────────────────────────────────────────────────────────────
-function buildSegmentFilter() {
-  const container = document.getElementById("segmentFilter");
-  SEGMENTS.forEach(seg => {
-    const pill = document.createElement("button");
-    pill.className = "seg-pill" + (seg.id === "all" ? " active" : "");
-    pill.textContent = seg.emoji + " " + seg.label;
-    pill.dataset.seg = seg.id;
-    pill.onclick = () => {
-      selectedSegment = seg.id;
-      document.querySelectorAll(".seg-pill").forEach(p => p.classList.remove("active"));
-      pill.classList.add("active");
-      filterPresets();
-    };
-    container.appendChild(pill);
-  });
-}
-
-function filterPresets() {
-  document.querySelectorAll(".preset-card").forEach(card => {
-    const preset = PRESETS.find(p => p.id === card.dataset.id);
-    if (!preset) return;
-    let show;
-    if (selectedSegment === "all") show = true;
-    else show = preset.segment === selectedSegment;
-    card.classList.toggle("hidden", !show);
-  });
-}
-
-// ── Presets grid ──────────────────────────────────────────────────────────────
-function buildPresetsGrid() {
-  const grid = document.getElementById("presetsGrid");
+// ── Build font gallery ────────────────────────────────────────────────────────
+function buildFontGallery() {
+  const grid = document.getElementById("fontGallery");
   grid.innerHTML = "";
-  PRESETS.forEach(p => {
+  FONT_STYLES.forEach(fs => {
     const card = document.createElement("div");
-    card.className = "preset-card";
-    card.dataset.id = p.id;
-    card.title = p.description || p.label;
-    card.innerHTML = `
-      <canvas class="preset-canvas" id="pcanvas-${p.id}"></canvas>
-      <div class="preset-label">${p.emoji} ${p.label}</div>
-      <div class="preset-check">✓</div>
-    `;
-    card.onclick = () => selectPreset(p.id, card);
+    card.className = "font-card";
+    card.dataset.id = fs.id;
+    card.title = fs.label;
+
+    const cnv = document.createElement("canvas");
+    cnv.width = 256; cnv.height = 160; // retina-ish — displayed at 128x80
+    card.appendChild(cnv);
+
+    card.onclick = () => {
+      document.querySelectorAll(".font-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      selectedFontId = fs.id;
+      document.getElementById("btnUseFont").disabled = false;
+    };
+
     grid.appendChild(card);
-    drawPresetThumb(p);
+  });
+
+  // Draw cards once fonts are ready
+  document.fonts.ready.then(() => {
+    setTimeout(drawAllFontCards, 100);
   });
 }
 
-function drawPresetThumb(preset) {
-  const canvas = document.getElementById("pcanvas-" + preset.id);
-  if (!canvas) return;
-  const W = 220, H = 165;
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext("2d");
-
-  // Background — photo or gradient placeholder
-  const img = document.getElementById("baseImg");
-  if (img && img.complete && img.naturalWidth > 0 && img.style.display !== "none") {
-    ctx.drawImage(img, 0, 0, W, H);
-  } else {
-    // Placeholder gradient
-    const grd = ctx.createLinearGradient(0, 0, W, H);
-    grd.addColorStop(0, "#1e3a5f");
-    grd.addColorStop(1, "#0A1128");
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-    // Grid lines
-    ctx.strokeStyle = "rgba(255,255,255,.05)"; ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 22) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-    for (let y = 0; y < H; y += 22) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-  }
-
-  preset.draw(ctx, W, H, "João");
+function drawAllFontCards() {
+  const name = (document.getElementById("previewName").value || "Andressa").trim().split(" ")[0];
+  FONT_STYLES.forEach(fs => {
+    const card = document.querySelector(`.font-card[data-id="${fs.id}"]`);
+    if (!card) return;
+    const cnv = card.querySelector("canvas");
+    if (!cnv) return;
+    drawFontCard(cnv, fs, name);
+  });
 }
 
-function refreshAllPresetThumbs() {
-  PRESETS.forEach(p => drawPresetThumb(p));
+function drawFontCard(cnv, fs, name) {
+  const W = cnv.width, H = cnv.height;
+  const ctx = cnv.getContext("2d");
+
+  // Background
+  ctx.fillStyle = "#111c3a";
+  ctx.fillRect(0, 0, W, H);
+
+  // Font
+  const baseSize = Math.round(H * 0.32 * fs.sizeMult);
+  const weight = fs.bold ? "bold" : "normal";
+  const style  = fs.italic ? "italic" : "normal";
+  ctx.font = `${style} ${weight} ${baseSize}px '${fs.family}', serif`;
+  ctx.fillStyle = fs.color || "#1a1a2e";
+
+  // If color is too dark against dark bg, lighten it for the preview
+  const c = fs.color || "#1a1a2e";
+  const r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  ctx.fillStyle = lum < 0.3 ? "#d4c9b2" : c;
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(name, W / 2, H / 2);
+
+  // Label at bottom
+  ctx.font = `500 18px Inter, sans-serif`;
+  ctx.fillStyle = "rgba(255,255,255,0.38)";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(fs.label, W / 2, H - 8);
 }
 
-function selectPreset(id, cardEl) {
-  selectedPresetId = id;
-  document.querySelectorAll(".preset-card").forEach(c => c.classList.remove("selected"));
-  cardEl.classList.add("selected");
-  document.getElementById("btnApplyPreset").disabled = false;
+// ── Apply selected font card ──────────────────────────────────────────────────
+function applySelectedFont() {
+  if (!selectedFontId) return;
+  const fs = FONT_STYLES.find(f => f.id === selectedFontId);
+  if (!fs) return;
+  appliedFontId = fs.id;
+
+  // Sync Estilo tab controls to match
+  document.getElementById("sFontFamily").value = fs.family;
+  const baseSize = Math.round(52 * fs.sizeMult);
+  document.getElementById("sFontSize").value = baseSize;
+  document.getElementById("sFontSizeVal").textContent = baseSize;
+  document.getElementById("sFontColor").value = fs.color || "#1a1a2e";
+  manualBold   = fs.bold;
+  manualItalic = fs.italic;
+  updateToggleBtns();
+  document.getElementById("sShadow").checked    = false;
+  document.getElementById("sUnderline").checked = false;
+
+  applyManualStyle();
+  toast("Fonte aplicada!", "success");
 }
 
-function applyPreset() {
-  if (!selectedPresetId || !imgNaturalW) {
-    if (!imgNaturalW) toast("Faça upload de uma foto primeiro", "error");
+// ── Manual style (Estilo tab) ─────────────────────────────────────────────────
+function onFontSizeChange(el) {
+  document.getElementById("sFontSizeVal").textContent = el.value;
+  applyManualStyle();
+}
+
+function toggleStyle(which) {
+  if (which === "bold")   { manualBold   = !manualBold;   }
+  if (which === "italic") { manualItalic = !manualItalic; }
+  updateToggleBtns();
+  applyManualStyle();
+}
+
+function updateToggleBtns() {
+  document.getElementById("btnBold").classList.toggle("active", manualBold);
+  document.getElementById("btnItalic").classList.toggle("active", manualItalic);
+}
+
+function applyManualStyle() {
+  const overlay = document.getElementById("nameOverlay");
+  if (!overlay) return;
+
+  const family  = document.getElementById("sFontFamily").value;
+  const size    = parseInt(document.getElementById("sFontSize").value) || 52;
+  const color   = document.getElementById("sFontColor").value;
+  const shadow  = document.getElementById("sShadow").checked;
+  const underline = document.getElementById("sUnderline").checked;
+
+  const fontStr = `${manualItalic ? "italic" : "normal"} ${manualBold ? "bold" : "normal"} ${size}px '${family}', serif`;
+  overlay.style.font        = fontStr;
+  overlay.style.color       = color;
+  overlay.style.textShadow  = shadow ? "2px 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(0,0,0,0.2)" : "none";
+
+  updateUnderline(underline);
+}
+
+// ── Name overlay ──────────────────────────────────────────────────────────────
+function updateOverlayText() {
+  const name = (document.getElementById("previewName").value || "Andressa").trim().split(" ")[0];
+  const overlay = document.getElementById("nameOverlay");
+  overlay.textContent = name;
+  // Redraw font cards too
+  drawAllFontCards();
+  // Update underline size after text changes
+  const underline = document.getElementById("sUnderline").checked;
+  requestAnimationFrame(() => updateUnderline(underline));
+}
+
+function positionOverlay() {
+  if (!imgDisplayW) return;
+  const overlay = document.getElementById("nameOverlay");
+  const wrap    = document.getElementById("canvasWrap");
+  const wrapW   = imgDisplayW;
+  const wrapH   = imgDisplayH;
+
+  // Center horizontally, position by percentage
+  const x = textXPct * wrapW;
+  const y = textYPct * wrapH;
+
+  // Get overlay width to center it
+  const ow = overlay.offsetWidth;
+  const oh = overlay.offsetHeight;
+
+  overlay.style.left = (x - ow / 2) + "px";
+  overlay.style.top  = (y - oh / 2) + "px";
+  overlay.classList.add("visible");
+
+  const underline = document.getElementById("sUnderline").checked;
+  updateUnderline(underline);
+}
+
+function updateUnderline(enabled) {
+  const svg  = document.getElementById("underlineSvg");
+  const path = document.getElementById("underlinePath");
+  const overlay = document.getElementById("nameOverlay");
+
+  if (!enabled || !imgDisplayW) {
+    svg.classList.remove("visible");
     return;
   }
-  const preset = PRESETS.find(p => p.id === selectedPresetId);
-  if (!preset) return;
 
-  const { box, text } = preset.fn(imgNaturalW, imgNaturalH);
+  const ow = overlay.offsetWidth;
+  const oh = overlay.offsetHeight;
+  const ox = parseFloat(overlay.style.left) || 0;
+  const oy = parseFloat(overlay.style.top)  || 0;
 
-  // Apply to fields
-  setNum("fX", box.x); setNum("fY", box.y);
-  setNum("fW", box.width); setNum("fH", box.height);
-  document.getElementById("fRadius").value = box.radius;
-  document.getElementById("radiusVal").textContent = box.radius;
-  document.getElementById("fBorderW").value = box.border_width;
-  document.getElementById("fBorderColor").value = box.border_color;
-  document.getElementById("fFontSize").value = text.font_size;
-  document.getElementById("fFontColor").value = text.font_color;
-  document.getElementById("fBgColor").value = text.bg_color;
-  document.getElementById("fBold").checked = text.bold;
-  const op = Math.round((text.opacity ?? 1) * 100);
-  document.getElementById("fOpacity").value = op;
-  document.getElementById("opacityVal").textContent = op + "%";
-  setAlign(text.align || "center");
+  const underW = ow * 0.85;
+  const startX = ox + ow * 0.075;
+  const startY = oy + oh + 4;
+  const midX   = startX + underW / 2;
+  const midY   = startY + 5;
+  const endX   = startX + underW;
+  const endY   = startY;
 
-  syncOverlayFromProps();
-  drawBoxPreview();
-  toast(`Estilo "${preset.label}" aplicado!`, "success");
+  svg.style.left   = "0";
+  svg.style.top    = "0";
+  svg.style.width  = imgDisplayW + "px";
+  svg.style.height = imgDisplayH + "px";
+  path.setAttribute("d", `M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`);
+  svg.classList.add("visible");
+}
+
+// ── Dragging name overlay ─────────────────────────────────────────────────────
+function initOverlayDrag() {
+  const overlay = document.getElementById("nameOverlay");
+
+  overlay.addEventListener("mousedown", e => {
+    isDraggingText = true;
+    const rect = overlay.getBoundingClientRect();
+    dragTextOffX = e.clientX - rect.left;
+    dragTextOffY = e.clientY - rect.top;
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", e => {
+    if (!isDraggingText) return;
+    const wrap     = document.getElementById("canvasWrap");
+    const wrapRect = wrap.getBoundingClientRect();
+    const ow = overlay.offsetWidth;
+    const oh = overlay.offsetHeight;
+
+    let nx = e.clientX - wrapRect.left - dragTextOffX;
+    let ny = e.clientY - wrapRect.top  - dragTextOffY;
+
+    // Clamp within photo
+    nx = Math.max(-ow * 0.3, Math.min(nx, imgDisplayW - ow * 0.7));
+    ny = Math.max(-oh * 0.3, Math.min(ny, imgDisplayH - oh * 0.7));
+
+    overlay.style.left = nx + "px";
+    overlay.style.top  = ny + "px";
+
+    // Store as percentages of center point
+    textXPct = (nx + ow / 2) / imgDisplayW;
+    textYPct = (ny + oh / 2) / imgDisplayH;
+
+    const underline = document.getElementById("sUnderline").checked;
+    updateUnderline(underline);
+  });
+
+  document.addEventListener("mouseup", () => { isDraggingText = false; });
+
+  // Touch support
+  overlay.addEventListener("touchstart", e => {
+    isDraggingText = true;
+    const t = e.touches[0];
+    const rect = overlay.getBoundingClientRect();
+    dragTextOffX = t.clientX - rect.left;
+    dragTextOffY = t.clientY - rect.top;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener("touchmove", e => {
+    if (!isDraggingText) return;
+    const t = e.touches[0];
+    const wrap     = document.getElementById("canvasWrap");
+    const wrapRect = wrap.getBoundingClientRect();
+    const ow = overlay.offsetWidth;
+    const oh = overlay.offsetHeight;
+
+    let nx = t.clientX - wrapRect.left - dragTextOffX;
+    let ny = t.clientY - wrapRect.top  - dragTextOffY;
+    nx = Math.max(-ow * 0.3, Math.min(nx, imgDisplayW - ow * 0.7));
+    ny = Math.max(-oh * 0.3, Math.min(ny, imgDisplayH - oh * 0.7));
+
+    overlay.style.left = nx + "px";
+    overlay.style.top  = ny + "px";
+    textXPct = (nx + ow / 2) / imgDisplayW;
+    textYPct = (ny + oh / 2) / imgDisplayH;
+
+    const underline = document.getElementById("sUnderline").checked;
+    updateUnderline(underline);
+  }, { passive: false });
+
+  document.addEventListener("touchend", () => { isDraggingText = false; });
+}
+
+// ── Image load ────────────────────────────────────────────────────────────────
+function onImgLoad() {
+  const img = document.getElementById("baseImg");
+  imgNaturalW = img.naturalWidth;
+  imgNaturalH = img.naturalHeight;
+  imgDisplayW = img.clientWidth;
+  imgDisplayH = img.clientHeight;
+
+  document.getElementById("nameOverlay").classList.add("visible");
+  updateOverlayText();
+  applyManualStyle();
+
+  // Wait a frame for layout, then position
+  requestAnimationFrame(() => {
+    imgDisplayW = img.clientWidth;
+    imgDisplayH = img.clientHeight;
+    positionOverlay();
+    showDragHint();
+  });
+}
+
+function showDragHint() {
+  const hint = document.getElementById("dragHint");
+  hint.classList.remove("hidden");
+  setTimeout(() => hint.classList.add("hidden"), 3000);
 }
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  ["presets","design","urls"].forEach(t => {
+  ["fontes","estilo","urls"].forEach(t => {
     document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? "flex" : "none";
   });
-  document.querySelectorAll(".panel-tab").forEach((el, i) => {
-    el.classList.toggle("active", ["presets","design","urls"][i] === tab);
+  document.querySelectorAll(".panel-tab").forEach(el => {
+    el.classList.toggle("active", el.dataset.tab === tab);
   });
   if (tab === "urls") updateURLs();
 }
@@ -985,14 +892,15 @@ async function loadTemplates() {
 
 function buildTplItem({ slug, label }) {
   const div = document.createElement("div");
-  div.className = "tpl-item"; div.dataset.slug = slug;
+  div.className = "tpl-item";
+  div.dataset.slug = slug;
   div.onclick = () => selectTemplate(slug);
   div.innerHTML = `
     <div class="tpl-thumb" id="thumb-${slug}">
       <img src="/template-image/${slug}?t=${Date.now()}" onerror="this.style.display='none'" alt="">
     </div>
     <span class="tpl-name">${label}</span>
-    <button class="tpl-del" title="Excluir" onclick="event.stopPropagation();deleteTemplate('${slug}')">✕</button>
+    <button class="tpl-del" title="Excluir" onclick="event.stopPropagation();deleteTemplate('${slug}')">&#x2715;</button>
   `;
   return div;
 }
@@ -1008,273 +916,112 @@ async function selectTemplate(slug) {
 
 function loadConfig(cfg) {
   document.getElementById("tplLabelInput").value = cfg.label || "";
-  const b = cfg.box || {};
-  setNum("fX", b.x ?? 50); setNum("fY", b.y ?? 50);
-  setNum("fW", b.width ?? 300); setNum("fH", b.height ?? 80);
-  document.getElementById("fRadius").value = b.radius ?? 12;
-  document.getElementById("radiusVal").textContent = b.radius ?? 12;
-  document.getElementById("fBorderW").value = b.border_width ?? 0;
-  document.getElementById("fBorderColor").value = b.border_color || "#2563EB";
 
-  const t = cfg.text || {};
-  setNum("fFontSize", t.font_size ?? 40);
-  document.getElementById("fFontColor").value = t.font_color || "#2563EB";
-  document.getElementById("fBgColor").value = t.bg_color || "#ffffff";
-  document.getElementById("fBold").checked = t.bold !== false;
-  const op = Math.round((t.opacity ?? 1) * 100);
-  document.getElementById("fOpacity").value = op;
-  document.getElementById("opacityVal").textContent = op + "%";
-  setAlign(t.align || "center");
+  // Font style
+  const fid = cfg.preset_id || null;
+  appliedFontId  = fid;
+  selectedFontId = fid;
 
-  const icon = cfg.icon;
-  hasIcon = !!icon;
-  if (icon) {
-    showIconPreview(icon);
-    document.getElementById("fIconSize").value = icon.size ?? 40;
-    document.getElementById("iconSizeVal").textContent = icon.size ?? 40;
+  if (fid) {
+    const fs = FONT_STYLES.find(f => f.id === fid);
+    if (fs) {
+      // Highlight the card
+      document.querySelectorAll(".font-card").forEach(c => c.classList.toggle("selected", c.dataset.id === fid));
+      document.getElementById("btnUseFont").disabled = false;
+
+      // Restore manual controls from font style
+      document.getElementById("sFontFamily").value = fs.family;
+      const baseSize = cfg.font_size || Math.round(52 * fs.sizeMult);
+      document.getElementById("sFontSize").value = baseSize;
+      document.getElementById("sFontSizeVal").textContent = baseSize;
+      document.getElementById("sFontColor").value = cfg.font_color || fs.color;
+      manualBold   = cfg.bold   !== undefined ? cfg.bold   : fs.bold;
+      manualItalic = cfg.italic !== undefined ? cfg.italic : fs.italic;
+      updateToggleBtns();
+      document.getElementById("sShadow").checked    = !!cfg.shadow;
+      document.getElementById("sUnderline").checked = !!cfg.underline;
+    }
   } else {
-    hideIconPreview();
+    // Load from manual fields if available
+    if (cfg.font_family) document.getElementById("sFontFamily").value = cfg.font_family;
+    if (cfg.font_size)   { document.getElementById("sFontSize").value = cfg.font_size; document.getElementById("sFontSizeVal").textContent = cfg.font_size; }
+    if (cfg.font_color)  document.getElementById("sFontColor").value = cfg.font_color;
+    manualBold   = !!cfg.bold;
+    manualItalic = !!cfg.italic;
+    updateToggleBtns();
+    document.getElementById("sShadow").checked    = !!cfg.shadow;
+    document.getElementById("sUnderline").checked = !!cfg.underline;
   }
+
+  // Text position
+  if (cfg.text_x_pct !== undefined) textXPct = cfg.text_x_pct;
+  if (cfg.text_y_pct !== undefined) textYPct = cfg.text_y_pct;
 }
 
 function loadPhoto(slug) {
-  const img = document.getElementById("baseImg");
+  const img   = document.getElementById("baseImg");
   const empty = document.getElementById("emptyCanvas");
-  const canvas = document.getElementById("boxCanvas");
-  img.style.display = "none"; empty.style.display = "none";
+  img.style.display = "none";
+  empty.style.display = "none";
   img.src = `/template-image/${slug}?t=${Date.now()}`;
   img.onload = () => {
     img.style.display = "block";
-    canvas.style.display = "block";
     onImgLoad();
-    // Refresh preset thumbnails with real photo
-    setTimeout(refreshAllPresetThumbs, 50);
+    // After actual load, reposition from saved percentages
+    requestAnimationFrame(() => positionOverlay());
   };
-  img.onerror = () => { empty.style.display = "flex"; img.style.display = "none"; };
-}
-
-// ── Canvas size sync ──────────────────────────────────────────────────────────
-function onImgLoad() {
-  const img = document.getElementById("baseImg");
-  imgNaturalW = img.naturalWidth; imgNaturalH = img.naturalHeight;
-  imgDisplayW = img.clientWidth; imgDisplayH = img.clientHeight;
-  const canvas = document.getElementById("boxCanvas");
-  canvas.width = imgDisplayW; canvas.height = imgDisplayH;
-  canvas.style.width = imgDisplayW + "px"; canvas.style.height = imgDisplayH + "px";
-  syncOverlayFromProps(); drawBoxPreview();
-}
-
-function scaleX() { return imgNaturalW > 0 ? imgDisplayW / imgNaturalW : 1; }
-function scaleY() { return imgNaturalH > 0 ? imgDisplayH / imgNaturalH : 1; }
-
-function syncOverlayFromProps() {
-  if (!imgNaturalW) return;
-  const sx = scaleX(), sy = scaleY();
-  const ov = document.getElementById("boxOverlay");
-  ov.style.left = (getNum("fX") * sx) + "px";
-  ov.style.top  = (getNum("fY") * sy) + "px";
-  ov.style.width  = (getNum("fW") * sx) + "px";
-  ov.style.height = (getNum("fH") * sy) + "px";
-  ov.style.borderRadius = getNum("fRadius") + "px";
-  ov.classList.add("visible");
-}
-
-function syncPropsFromOverlay() {
-  if (!imgNaturalW) return;
-  const sx = scaleX(), sy = scaleY();
-  const ov = document.getElementById("boxOverlay");
-  setNum("fX", Math.round(parseInt(ov.style.left)   / sx));
-  setNum("fY", Math.round(parseInt(ov.style.top)    / sy));
-  setNum("fW", Math.round(parseInt(ov.style.width)  / sx));
-  setNum("fH", Math.round(parseInt(ov.style.height) / sy));
-}
-
-// ── Drag / resize ─────────────────────────────────────────────────────────────
-const overlay = document.getElementById("boxOverlay");
-
-overlay.addEventListener("mousedown", e => {
-  if (e.target.classList.contains("resize-se") || e.target.classList.contains("resize-e")) return;
-  isDragging = true;
-  const wrap = document.getElementById("canvasWrap");
-  const wrapRect = wrap.getBoundingClientRect();
-  dragOffX = e.clientX - wrapRect.left - overlay.offsetLeft;
-  dragOffY = e.clientY - wrapRect.top - overlay.offsetTop;
-  e.preventDefault();
-});
-document.getElementById("resizeSE").addEventListener("mousedown", e => {
-  isResizingSE = true; resizeStartX = e.clientX; resizeStartY = e.clientY;
-  resizeStartW = overlay.offsetWidth; resizeStartH = overlay.offsetHeight;
-  e.preventDefault(); e.stopPropagation();
-});
-document.getElementById("resizeE").addEventListener("mousedown", e => {
-  isResizingE = true; resizeStartX = e.clientX; resizeStartW = overlay.offsetWidth;
-  e.preventDefault(); e.stopPropagation();
-});
-
-document.addEventListener("mousemove", e => {
-  if (isDragging) {
-    const wrap = document.getElementById("canvasWrap");
-    const wrapRect = wrap.getBoundingClientRect();
-    let nx = Math.max(0, Math.min(e.clientX - wrapRect.left - dragOffX, imgDisplayW - overlay.offsetWidth));
-    let ny = Math.max(0, Math.min(e.clientY - wrapRect.top - dragOffY, imgDisplayH - overlay.offsetHeight));
-    overlay.style.left = nx + "px"; overlay.style.top = ny + "px";
-    syncPropsFromOverlay(); drawBoxPreview();
-  }
-  if (isResizingSE) {
-    overlay.style.width  = Math.max(60, resizeStartW + (e.clientX - resizeStartX)) + "px";
-    overlay.style.height = Math.max(30, resizeStartH + (e.clientY - resizeStartY)) + "px";
-    syncPropsFromOverlay(); drawBoxPreview();
-  }
-  if (isResizingE) {
-    overlay.style.width = Math.max(60, resizeStartW + (e.clientX - resizeStartX)) + "px";
-    syncPropsFromOverlay(); drawBoxPreview();
-  }
-});
-document.addEventListener("mouseup", () => { isDragging = false; isResizingSE = false; isResizingE = false; });
-
-// ── Prop change handlers ──────────────────────────────────────────────────────
-function onPropChange() { syncOverlayFromProps(); drawBoxPreview(); }
-function onRadiusChange(el) { document.getElementById("radiusVal").textContent = el.value; overlay.style.borderRadius = el.value + "px"; drawBoxPreview(); }
-function onOpacityChange(el) { document.getElementById("opacityVal").textContent = el.value + "%"; drawBoxPreview(); }
-function onIconSizeChange(el) { document.getElementById("iconSizeVal").textContent = el.value; drawBoxPreview(); }
-function onLabelInput() {} // dirty flag only — saved on button
-
-// ── Live canvas preview ───────────────────────────────────────────────────────
-function drawBoxPreview() {
-  const canvas = document.getElementById("boxCanvas");
-  if (!canvas || !imgDisplayW) return;
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const sx = scaleX(), sy = scaleY();
-  const x = getNum("fX")*sx, y = getNum("fY")*sy;
-  const w = getNum("fW")*sx, h = getNum("fH")*sy;
-  const r = Math.min(getNum("fRadius"), w/2, h/2);
-  const bgColor = document.getElementById("fBgColor").value;
-  const fontColor = document.getElementById("fFontColor").value;
-  const fontSize = Math.round(getNum("fFontSize") * sx);
-  const bold = document.getElementById("fBold").checked;
-  const borderW = getNum("fBorderW");
-  const borderColor = document.getElementById("fBorderColor").value;
-  const opacity = getNum("fOpacity") / 100;
-  const name = (document.getElementById("previewName").value || "João").trim().split(" ")[0];
-
-  // If a preset is selected and visible, use its draw function for richer preview
-  if (selectedPresetId) {
-    const preset = PRESETS.find(p => p.id === selectedPresetId);
-    if (preset) {
-      preset.draw(ctx, imgDisplayW, imgDisplayH, name);
-      return;
-    }
-  }
-
-  // Manual / fallback draw
-  ctx.save(); ctx.globalAlpha = opacity;
-  rRect(ctx, x, y, w, h, r); ctx.fillStyle = bgColor; ctx.fill();
-  if (borderW > 0) { ctx.lineWidth = borderW; ctx.strokeStyle = borderColor; ctx.stroke(); }
-  ctx.restore();
-
-  // Icon
-  const iconImg = document.getElementById("iconPreviewImg");
-  let iconWidth = 0;
-  if (hasIcon && iconImg && iconImg.complete && iconImg.naturalWidth > 0) {
-    const sz = getNum("fIconSize") * Math.min(sx, sy);
-    ctx.drawImage(iconImg, x + 10, y + (h - sz)/2, sz, sz);
-    iconWidth = sz + 18;
-  }
-
-  // Text
-  ctx.save();
-  ctx.font = `${bold ? "bold" : "normal"} ${fontSize}px Inter, sans-serif`;
-  ctx.fillStyle = fontColor; ctx.textBaseline = "middle";
-  const availW = w - iconWidth;
-  const startX = x + iconWidth;
-  let textX;
-  if (currentAlign === "center") { ctx.textAlign = "center"; textX = startX + availW/2; }
-  else if (currentAlign === "right") { ctx.textAlign = "right"; textX = x + w - 16; }
-  else { ctx.textAlign = "left"; textX = startX + 16; }
-  ctx.fillText(name + "!", textX, y + h/2);
-  ctx.restore();
-}
-
-// ── Align ─────────────────────────────────────────────────────────────────────
-function setAlign(val, btn) {
-  currentAlign = val;
-  document.querySelectorAll(".align-btn").forEach(b => b.classList.toggle("active", b.dataset.align === val));
-  drawBoxPreview();
+  img.onerror = () => {
+    empty.style.display = "flex";
+    img.style.display = "none";
+  };
 }
 
 // ── Photo upload ──────────────────────────────────────────────────────────────
 async function uploadPhoto(input) {
   if (!input.files[0]) return;
   if (!currentSlug) return toast("Selecione ou crie um template primeiro", "error");
-  const fd = new FormData(); fd.append("photo", input.files[0]);
+  const fd = new FormData();
+  fd.append("photo", input.files[0]);
   const res = await fetch(`/api/templates/${currentSlug}/photo`, { method: "POST", body: fd });
   if (res.ok) {
-    loadPhoto(currentSlug); refreshThumb(currentSlug);
+    loadPhoto(currentSlug);
+    refreshThumb(currentSlug);
     toast("Foto atualizada", "success");
-  } else { toast("Erro ao fazer upload", "error"); }
-}
-
-// ── Icon upload ───────────────────────────────────────────────────────────────
-async function uploadIcon(input) {
-  if (!input.files[0] || !currentSlug) return;
-  const fd = new FormData(); fd.append("icon", input.files[0]);
-  const res = await fetch(`/api/templates/${currentSlug}/icon`, { method: "POST", body: fd });
-  if (res.ok) {
-    hasIcon = true;
-    showIconPreview({ name: input.files[0].name, url: `/template-icon/${currentSlug}?t=${Date.now()}` });
-    setTimeout(drawBoxPreview, 200); toast("Ícone carregado", "success");
-  } else { toast("Erro ao carregar ícone", "error"); }
-}
-
-async function deleteIcon() {
-  if (!currentSlug) return;
-  await fetch(`/api/templates/${currentSlug}/icon`, { method: "DELETE" });
-  hasIcon = false; hideIconPreview(); drawBoxPreview(); toast("Ícone removido");
-}
-
-function showIconPreview({ name, url, size }) {
-  hasIcon = true;
-  const row = document.getElementById("iconPreviewRow");
-  const img = document.getElementById("iconPreviewImg");
-  row.style.display = "flex";
-  img.src = url || `/template-icon/${currentSlug}?t=${Date.now()}`;
-  img.onload = drawBoxPreview;
-  document.getElementById("iconPreviewName").textContent = name || "ícone";
-  document.getElementById("iconUploadZone").style.display = "none";
-  document.getElementById("iconSizeField").style.display = "block";
-  if (size) { document.getElementById("fIconSize").value = size; document.getElementById("iconSizeVal").textContent = size; }
-}
-
-function hideIconPreview() {
-  hasIcon = false;
-  document.getElementById("iconPreviewRow").style.display = "none";
-  document.getElementById("iconUploadZone").style.display = "block";
-  document.getElementById("iconSizeField").style.display = "none";
+  } else {
+    toast("Erro ao fazer upload", "error");
+  }
 }
 
 // ── Save ──────────────────────────────────────────────────────────────────────
 async function saveTemplate() {
   if (!currentSlug) return toast("Selecione um template", "error");
+
   const body = {
-    label: document.getElementById("tplLabelInput").value || currentSlug,
-    preset_id: selectedPresetId || null,
-    box: {
-      x: getNum("fX"), y: getNum("fY"), width: getNum("fW"), height: getNum("fH"),
-      radius: getNum("fRadius"), border_width: getNum("fBorderW"),
-      border_color: document.getElementById("fBorderColor").value,
-    },
-    text: {
-      font_size: getNum("fFontSize"), font_color: document.getElementById("fFontColor").value,
-      bg_color: document.getElementById("fBgColor").value, bold: document.getElementById("fBold").checked,
-      align: currentAlign, opacity: getNum("fOpacity") / 100,
-    },
-    icon: hasIcon ? { size: getNum("fIconSize"), x: 10 } : null,
+    label:       document.getElementById("tplLabelInput").value || currentSlug,
+    preset_id:   appliedFontId || null,
+    font_family: document.getElementById("sFontFamily").value,
+    font_size:   parseInt(document.getElementById("sFontSize").value) || 52,
+    font_color:  document.getElementById("sFontColor").value,
+    bold:        manualBold,
+    italic:      manualItalic,
+    shadow:      document.getElementById("sShadow").checked,
+    underline:   document.getElementById("sUnderline").checked,
+    text_x_pct:  textXPct,
+    text_y_pct:  textYPct,
   };
-  const res = await fetch(`/api/templates/${currentSlug}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (res.ok) { toast("Template salvo!", "success"); loadTemplates(); }
-  else { toast("Erro ao salvar", "error"); }
+
+  const res = await fetch(`/api/templates/${currentSlug}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (res.ok) {
+    toast("Template salvo!", "success");
+    loadTemplates();
+  } else {
+    toast("Erro ao salvar", "error");
+  }
 }
 
 // ── New / delete ──────────────────────────────────────────────────────────────
@@ -1289,7 +1036,7 @@ function closeModal() {
 async function confirmNew() {
   const label = document.getElementById("newTplName").value.trim();
   if (!label) return;
-  const res = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label }) });
+  const res  = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label }) });
   const data = await res.json();
   closeModal();
   await loadTemplates();
@@ -1302,33 +1049,48 @@ async function deleteTemplate(slug) {
   if (currentSlug === slug) {
     currentSlug = null;
     document.getElementById("baseImg").style.display = "none";
-    document.getElementById("boxCanvas").style.display = "none";
-    document.getElementById("boxOverlay").classList.remove("visible");
+    document.getElementById("nameOverlay").classList.remove("visible");
+    document.getElementById("underlineSvg").classList.remove("visible");
     document.getElementById("emptyCanvas").style.display = "flex";
   }
-  toast("Excluído"); loadTemplates();
+  toast("Excluido");
+  loadTemplates();
 }
 
+// ── Name input ────────────────────────────────────────────────────────────────
+function onNameInput() {
+  updateOverlayText();
+  requestAnimationFrame(() => positionOverlay());
+}
+function onLabelInput() {} // just marks dirty
+
 // ── URLs ──────────────────────────────────────────────────────────────────────
+function loadVpsHost() {
+  try {
+    const v = localStorage.getItem("imgreview_vps_host");
+    if (v) { document.getElementById("vpsHost").value = v; updateURLs(); }
+  } catch(e) {}
+}
+
 function updateURLs() {
   const slug = currentSlug || "nome-do-template";
   const host = document.getElementById("vpsHost")?.value.trim() || "";
   try { localStorage.setItem("imgreview_vps_host", host); } catch(e) {}
-  document.getElementById("workerUrl").textContent = `https://${WORKER_DOMAIN}/render?template=${slug}&name={{contact.first_name}}`;
-  document.getElementById("apiUrl").textContent = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Jo%C3%A3o`;
+  document.getElementById("workerUrl").textContent  = `https://${WORKER_DOMAIN}/render?template=${slug}&name={{contact.first_name}}`;
+  document.getElementById("apiUrl").textContent     = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Andressa`;
   document.getElementById("previewUrl").textContent = `https://imggen-4uqo.onrender.com/render?template=${slug}&name=Teste`;
 }
 
 async function copyURL(id, btn) {
   await navigator.clipboard.writeText(document.getElementById(id).textContent);
-  btn.textContent = "✓ Copiado"; btn.classList.add("copied");
+  btn.textContent = "Copiado";
+  btn.classList.add("copied");
   setTimeout(() => { btn.textContent = "Copiar"; btn.classList.remove("copied"); }, 1800);
 }
 
-// ── Open rendered ─────────────────────────────────────────────────────────────
 function openRendered() {
   if (!currentSlug) return toast("Selecione um template", "error");
-  const name = document.getElementById("previewName").value || "João";
+  const name = document.getElementById("previewName").value || "Andressa";
   window.open(`/render?template=${currentSlug}&name=${encodeURIComponent(name)}`, "_blank");
 }
 
@@ -1338,13 +1100,13 @@ function refreshThumb(slug) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function getNum(id) { return parseFloat(document.getElementById(id).value) || 0; }
-function setNum(id, v) { document.getElementById(id).value = v; }
-
 function toast(msg, type = "") {
   const el = document.getElementById("toast");
-  el.textContent = msg; el.className = "toast " + type; el.classList.add("show");
-  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2200);
+  el.textContent = msg;
+  el.className = "toast " + type;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 2200);
 }
 
 document.getElementById("modalNew").addEventListener("click", e => { if (e.target === e.currentTarget) closeModal(); });
@@ -1352,9 +1114,13 @@ document.getElementById("modalNew").addEventListener("click", e => { if (e.targe
 // ── Boot ──────────────────────────────────────────────────────────────────────
 window.onload = () => {
   loadVpsHost();
-  buildSegmentFilter();
-  buildPresetsGrid();
+  buildFontGallery();
+  initOverlayDrag();
   loadTemplates();
+
+  // Set initial manual style defaults
+  updateToggleBtns();
+  applyManualStyle();
 };
 </script>
 </body>
