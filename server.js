@@ -510,6 +510,104 @@ const PRESETS = {
     sName(ctx,name,w/2,by+bh*.34,Math.round(h*.068),"#4ade80");
     sSub(ctx,"👷 Feito por profissionais. Avalie ⭐",w/2,by+bh*.73,Math.round(h*.032),"#fff");
   },
+
+  // ── V2: Caixa sólida + ícone + nome — estilo moderno ─────────────────────────
+  // Template 1: Caixa escura na base (dark pill) — universal
+  "v2-dark-base": (ctx,w,h,name) => {
+    const bw=w*.78,bh=Math.round(h*.14),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
+    ctx.save(); ctx.globalAlpha=.93; roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0d0d0d"; ctx.fill(); ctx.restore();
+    const fs=Math.round(h*.065),iS=Math.round(h*.055),pad=Math.round(bw*.07);
+    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("⭐",bx+pad,by+bh/2);
+    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+8,by+bh/2);
+  },
+
+  // Template 2: Caixa branca sólida (clean card) — universal
+  "v2-white-card": (ctx,w,h,name) => {
+    const bw=w*.76,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=12;
+    ctx.save(); ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=18; roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#ffffff"; ctx.fill(); ctx.restore();
+    const fs=Math.round(h*.062),pad=Math.round(bw*.06);
+    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText(name,bx+pad,by+bh*.5);
+    const metrics=ctx.measureText(name); const lx=bx+pad,ly=by+bh*.78,lw=Math.min(metrics.width,bw*.55);
+    ctx.fillStyle=C.blue; ctx.fillRect(lx,ly,lw,3);
+  },
+
+  // Template 3: Caixa na cor da marca (brand pill) — clinica
+  "v2-brand-pill": (ctx,w,h,name) => {
+    const bw=w*.74,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
+    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=C.blue; ctx.fill(); ctx.restore();
+    const fs=Math.round(h*.06),pad=Math.round(bw*.07),iS=Math.round(h*.055);
+    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("❤️",bx+pad,by+bh/2);
+    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+10,by+bh/2);
+  },
+
+  // Template 4: Ícone + nome minimalista (chip) — petshop
+  "v2-icon-chip": (ctx,w,h,name) => {
+    const pad=32,iS=Math.round(h*.07),gap=12;
+    ctx.font=`bold ${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`;
+    const tw=ctx.measureText(name).width;
+    const bw=iS+gap+tw+pad*2,bh=Math.round(h*.125);
+    const bx=(w-bw)/2,by=h-bh-h*.05,r=10;
+    ctx.save(); ctx.globalAlpha=.96; roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
+    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText("🐾",bx+pad,by+bh/2);
+    ctx.font=`bold ${Math.round(h*.065)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff";
+    ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+  },
+
+  // Template 5: Ícone nicho + nome — academia
+  "v2-nicho-academia": (ctx,w,h,name) => {
+    const pad=28,iS=Math.round(h*.065),gap=10;
+    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`;
+    const tw=ctx.measureText(name).width;
+    const bw=iS+gap+tw+pad*2,bh=Math.round(h*.12);
+    const bx=(w-bw)/2,by=h-bh-h*.05,r=8;
+    const grd=ctx.createLinearGradient(bx,by,bx+bw,by); grd.addColorStop(0,"#1d4ed8"); grd.addColorStop(1,"#111827");
+    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=grd; ctx.fill(); ctx.restore();
+    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#facc15"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText("💪",bx+pad,by+bh/2);
+    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff";
+    ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+  },
+
+  // Template 6: Ícone com cor de destaque (accent icon) — estetica
+  "v2-accent-estetica": (ctx,w,h,name) => {
+    const bw=w*.78,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10,acW=Math.round(bh*.9),acX=bx,acY=by+(bh-acW)/2;
+    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
+    ctx.save(); roundRect(ctx,acX,acY,acW,acW,r); ctx.fillStyle="#db2777"; ctx.fill(); ctx.restore();
+    ctx.font=`${Math.round(acW*.6)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText("💅",acX+acW/2,acY+acW/2);
+    const fs=Math.round(h*.062),tx=acX+acW+16;
+    ctx.font=`bold ${fs}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText(name,tx,by+bh/2);
+  },
+
+  // Template 7: Ícone + separador vertical (split card) — juridico
+  "v2-split-juridico": (ctx,w,h,name) => {
+    const bw=w*.76,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10;
+    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0f172a"; ctx.fill(); ctx.restore();
+    const iS=Math.round(h*.06),pad=Math.round(bh*.18),sepX=bx+pad+iS+pad*.8;
+    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText("⚖️",bx+pad+iS/2,by+bh/2);
+    ctx.strokeStyle="rgba(255,255,255,.2)"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(sepX,by+bh*.2); ctx.lineTo(sepX,by+bh*.8); ctx.stroke();
+    ctx.font=`bold ${Math.round(h*.058)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText(name,sepX+14,by+bh/2);
+  },
+
+  // Template 8: Ícone nicho + nome — servicos
+  "v2-nicho-servicos": (ctx,w,h,name) => {
+    const pad=26,iS=Math.round(h*.065),gap=12;
+    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`;
+    const tw=ctx.measureText(name).width;
+    const bw=iS+gap+tw+pad*2,bh=Math.round(h*.12);
+    const bx=(w-bw)/2,by=h-bh-h*.05,r=8;
+    ctx.save(); roundRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#16a34a"; ctx.fill(); ctx.restore();
+    ctx.font=`${iS}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText("🏠",bx+pad,by+bh/2);
+    ctx.font=`bold ${Math.round(h*.062)}px system-ui, -apple-system, sans-serif`; ctx.fillStyle="#fff";
+    ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+  },
 };
 
 // ── GET /render ────────────────────────────────────────────────────────────────

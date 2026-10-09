@@ -628,6 +628,7 @@ const SEGMENTS = [
   { id: "estetica",  label: "Estética",  emoji: "💅" },
   { id: "juridico",  label: "Jurídico",  emoji: "⚖️" },
   { id: "servicos",  label: "Serviços",  emoji: "🔧" },
+  { id: "v2",        label: "Estilo V2", emoji: "🆕" },
 ];
 
 let selectedSegment = "all";
@@ -1128,6 +1129,118 @@ const PRESETS = [
       subText(ctx,"👷 Feito por profissionais. Avalie ⭐",w/2,by+bh*.73,Math.round(h*.032),C.white);
     }
   },
+
+  // ── SÉRIE V2: Caixa sólida + ícone + nome — estilo moderno ───────────────────
+  {
+    id: "v2-dark-base", label: "V2 Dark Pill", emoji: "⬛", segment: "universal", v2: true,
+    description: "Pílula dark na base com ícone ⭐ — moderno, limpo",
+    fn(w,h){ const bw=w*.78,bh=Math.round(h*.14); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:bh/2,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:"#0d0d0d",bold:true,align:"left",opacity:.93} }; },
+    draw(ctx, w, h, name) {
+      const bw=w*.78,bh=Math.round(h*.14),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
+      ctx.save(); ctx.globalAlpha=.93; rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0d0d0d"; ctx.fill(); ctx.restore();
+      const fs=Math.round(h*.065),iS=Math.round(h*.055),pad=Math.round(bw*.07);
+      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("⭐",bx+pad,by+bh/2);
+      ctx.font=`bold ${fs}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+8,by+bh/2);
+    }
+  },
+  {
+    id: "v2-white-card", label: "V2 White Card", emoji: "⬜", segment: "universal", v2: true,
+    description: "Card branco sólido com underline azul — clean e profissional",
+    fn(w,h){ const bw=w*.76,bh=Math.round(h*.13); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:12,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#111827",bg_color:"#fff",bold:true,align:"left",opacity:1} }; },
+    draw(ctx, w, h, name) {
+      const bw=w*.76,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=12;
+      ctx.save(); ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=18; rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
+      const fs=Math.round(h*.062),pad=Math.round(bw*.06);
+      ctx.font=`bold ${fs}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
+      ctx.fillText(name,bx+pad,by+bh*.5);
+      const tw=ctx.measureText(name).width;
+      ctx.fillStyle=C.blue; ctx.fillRect(bx+pad,by+bh*.8,Math.min(tw,bw*.55),3);
+    }
+  },
+  {
+    id: "v2-brand-pill", label: "V2 Brand Pill", emoji: "🔵", segment: "clinica", v2: true,
+    description: "Pílula azul com ícone de coração — clínicas",
+    fn(w,h){ const bw=w*.74,bh=Math.round(h*.13); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:bh/2,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.06),font_color:"#fff",bg_color:C.blue,bold:true,align:"left",opacity:1} }; },
+    draw(ctx, w, h, name) {
+      const bw=w*.74,bh=Math.round(h*.13),bx=(w-bw)/2,by=h-bh-h*.05,r=bh/2;
+      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=C.blue; ctx.fill();
+      const fs=Math.round(h*.06),pad=Math.round(bw*.07),iS=Math.round(h*.055);
+      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("❤️",bx+pad,by+bh/2);
+      ctx.font=`bold ${fs}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+10,by+bh/2);
+    }
+  },
+  {
+    id: "v2-icon-chip", label: "V2 Pet Chip", emoji: "🐾", segment: "petshop", v2: true,
+    description: "Chip escuro com ícone de pata — petshop",
+    fn(w,h){ const bh=Math.round(h*.125); return { box:{x:0,y:h-bh-h*.05,width:0,height:bh,radius:10,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.065),font_color:"#fff",bg_color:"#111827",bold:true,align:"left",opacity:.96} }; },
+    draw(ctx, w, h, name) {
+      const pad=32,iS=Math.round(h*.07),gap=12,bh=Math.round(h*.125);
+      ctx.font=`bold ${Math.round(h*.065)}px system-ui,-apple-system,sans-serif`;
+      const tw=ctx.measureText(name).width;
+      const bw=iS+gap+tw+pad*2,bx=(w-bw)/2,by=h-bh-h*.05,r=10;
+      ctx.save(); ctx.globalAlpha=.96; rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#111827"; ctx.fill(); ctx.restore();
+      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("🐾",bx+pad,by+bh/2);
+      ctx.font=`bold ${Math.round(h*.065)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+    }
+  },
+  {
+    id: "v2-nicho-academia", label: "V2 Academia", emoji: "💪", segment: "academia", v2: true,
+    description: "Gradiente azul-escuro com ícone 💪 — academias",
+    fn(w,h){ const bh=Math.round(h*.12); return { box:{x:0,y:h-bh-h*.05,width:0,height:bh,radius:8,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#fff",bg_color:"#1d4ed8",bold:true,align:"left",opacity:1} }; },
+    draw(ctx, w, h, name) {
+      const pad=28,iS=Math.round(h*.065),gap=10,bh=Math.round(h*.12);
+      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`;
+      const tw=ctx.measureText(name).width;
+      const bw=iS+gap+tw+pad*2,bx=(w-bw)/2,by=h-bh-h*.05,r=8;
+      const grd=ctx.createLinearGradient(bx,by,bx+bw,by); grd.addColorStop(0,"#1d4ed8"); grd.addColorStop(1,"#111827");
+      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle=grd; ctx.fill();
+      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#facc15"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("💪",bx+pad,by+bh/2);
+      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+    }
+  },
+  {
+    id: "v2-accent-estetica", label: "V2 Estética", emoji: "💅", segment: "estetica", v2: true,
+    description: "Card branco com bloco de destaque rosa — estética",
+    fn(w,h){ const bh=Math.round(h*.125),bw=w*.78; return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:10,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#111827",bg_color:"#fff",bold:true,align:"left",opacity:.96} }; },
+    draw(ctx, w, h, name) {
+      const bw=w*.78,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10;
+      const acW=Math.round(bh*.9),acX=bx,acY=by+(bh-acW)/2;
+      ctx.save(); rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#fff"; ctx.fill(); ctx.restore();
+      ctx.save(); rRect(ctx,acX,acY,acW,acW,r); ctx.fillStyle="#db2777"; ctx.fill(); ctx.restore();
+      ctx.font=`${Math.round(acW*.6)}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("💅",acX+acW/2,acY+acW/2);
+      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#111827"; ctx.textAlign="left"; ctx.textBaseline="middle";
+      ctx.fillText(name,acX+acW+16,by+bh/2);
+    }
+  },
+  {
+    id: "v2-split-juridico", label: "V2 Jurídico", emoji: "⚖️", segment: "juridico", v2: true,
+    description: "Card dark com ícone + separador vertical — advocacia",
+    fn(w,h){ const bw=w*.76,bh=Math.round(h*.125); return { box:{x:(w-bw)/2,y:h-bh-h*.05,width:bw,height:bh,radius:10,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.058),font_color:"#fff",bg_color:"#0f172a",bold:true,align:"left",opacity:1} }; },
+    draw(ctx, w, h, name) {
+      const bw=w*.76,bh=Math.round(h*.125),bx=(w-bw)/2,by=h-bh-h*.05,r=10;
+      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#0f172a"; ctx.fill();
+      const iS=Math.round(h*.06),pad=Math.round(bh*.18),sepX=bx+pad+iS+pad*.8;
+      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("⚖️",bx+pad+iS/2,by+bh/2);
+      ctx.strokeStyle="rgba(255,255,255,.2)"; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(sepX,by+bh*.2); ctx.lineTo(sepX,by+bh*.8); ctx.stroke();
+      ctx.font=`bold ${Math.round(h*.058)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle";
+      ctx.fillText(name,sepX+14,by+bh/2);
+    }
+  },
+  {
+    id: "v2-nicho-servicos", label: "V2 Serviços", emoji: "🏠", segment: "servicos", v2: true,
+    description: "Chip verde com ícone de casa — serviços residenciais",
+    fn(w,h){ const bh=Math.round(h*.12); return { box:{x:0,y:h-bh-h*.05,width:0,height:bh,radius:8,border_width:0,border_color:"#fff"}, text:{font_size:Math.round(h*.062),font_color:"#fff",bg_color:"#16a34a",bold:true,align:"left",opacity:1} }; },
+    draw(ctx, w, h, name) {
+      const pad=26,iS=Math.round(h*.065),gap=12,bh=Math.round(h*.12);
+      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`;
+      const tw=ctx.measureText(name).width;
+      const bw=iS+gap+tw+pad*2,bx=(w-bw)/2,by=h-bh-h*.05,r=8;
+      rRect(ctx,bx,by,bw,bh,r); ctx.fillStyle="#16a34a"; ctx.fill();
+      ctx.font=`${iS}px sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.fillText("🏠",bx+pad,by+bh/2);
+      ctx.font=`bold ${Math.round(h*.062)}px system-ui,-apple-system,sans-serif`; ctx.fillStyle="#fff"; ctx.textAlign="left"; ctx.fillText(name,bx+pad+iS+gap,by+bh/2);
+    }
+  },
 ];
 
 function loadVpsHost() {
@@ -1159,7 +1272,10 @@ function filterPresets() {
   document.querySelectorAll(".preset-card").forEach(card => {
     const preset = PRESETS.find(p => p.id === card.dataset.id);
     if (!preset) return;
-    const show = selectedSegment === "all" || preset.segment === selectedSegment;
+    let show;
+    if (selectedSegment === "all") show = true;
+    else if (selectedSegment === "v2") show = !!preset.v2;
+    else show = preset.segment === selectedSegment;
     card.classList.toggle("hidden", !show);
   });
 }
