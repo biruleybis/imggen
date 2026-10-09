@@ -86,7 +86,7 @@ app.post("/auth/step1", rateLimit({ windowMs: 60000, max: 10 }), async (req, res
   }
   const otp   = genOtp();
   const token = genToken();
-  otpStore.set(token, { otp, expires: Date.now() + 10 * 60 * 1000 }); // 10 min
+  otpStore.set(token, { otp, expires: Date.now() + 30 * 60 * 1000 }); // 30 min
 
   try {
     await resend.emails.send({
@@ -107,10 +107,12 @@ app.post("/auth/step1", rateLimit({ windowMs: 60000, max: 10 }), async (req, res
 app.post("/auth/step2", rateLimit({ windowMs: 60000, max: 20 }), (req, res) => {
   const { token, otp } = req.body || {};
   const entry = otpStore.get(token);
+  const received = String(otp || "").replace(/\s+/g, "").trim();
+  console.log(`OTP check: token=${token?.slice(0,8)}… stored=${entry?.otp} received=${received} expired=${entry ? Date.now() > entry.expires : "no-entry"}`);
   if (!entry || Date.now() > entry.expires) {
-    return res.status(401).json({ error: "Código expirado" });
+    return res.status(401).json({ error: "Código expirado — clique em Voltar e tente novamente" });
   }
-  if (entry.otp !== String(otp).trim()) {
+  if (entry.otp !== received) {
     return res.status(401).json({ error: "Código incorreto" });
   }
   otpStore.delete(token);

@@ -218,7 +218,7 @@
   async function doStep2() {
     clearMsgs();
     const btn = document.getElementById("btnStep2");
-    const otp = document.getElementById("otp").value.trim();
+    const otp = document.getElementById("otp").value.replace(/\s+/g, "").trim();
     if (otp.length < 6) return showError("Digite o código de 6 dígitos");
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Verificando...';
