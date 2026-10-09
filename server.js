@@ -19,7 +19,11 @@ async function connectMongo() {
     return;
   }
   try {
-    const client = new MongoClient(MONGO_URI);
+    const client = new MongoClient(MONGO_URI, {
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      serverSelectionTimeoutMS: 10000,
+    });
     await client.connect();
     db = client.db("imggen");
     await db.collection("templates").createIndex({ slug: 1 }, { unique: true });
