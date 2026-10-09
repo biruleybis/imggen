@@ -143,6 +143,12 @@ const TEMPLATES_DIR = path.join(__dirname, "templates");
     { pkg: "cinzel",            file: "cinzel-latin-700-normal.woff2",                   family: "Cinzel" },
     { pkg: "pacifico",          file: "pacifico-latin-400-normal.woff2",                 family: "Pacifico" },
     { pkg: "josefin-sans",      file: "josefin-sans-latin-700-normal.woff2",             family: "Josefin Sans" },
+    { pkg: "bebas-neue",        file: "bebas-neue-latin-400-normal.woff2",               family: "Bebas Neue" },
+    { pkg: "oswald",            file: "oswald-latin-700-normal.woff2",                   family: "Oswald" },
+    { pkg: "yeseva-one",        file: "yeseva-one-latin-400-normal.woff2",               family: "Yeseva One" },
+    { pkg: "vollkorn",          file: "vollkorn-latin-700-normal.woff2",                 family: "Vollkorn" },
+    { pkg: "abhaya-libre",      file: "abhaya-libre-latin-700-normal.woff2",             family: "Abhaya Libre" },
+    { pkg: "oranienbaum",       file: "oranienbaum-latin-400-normal.woff2",              family: "Oranienbaum" },
   ];
   for (const { pkg, file, family } of toRegister) {
     const fontPath = path.join(fontsourceDir, pkg, "files", file);
