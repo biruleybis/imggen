@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImgReview — Acesso</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f172a;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f1f5f9;
+  }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .logo-badge {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    letter-spacing: .5px;
+  }
+  .logo-name { font-size: 15px; font-weight: 600; color: #94a3b8; }
+  .logo-name span { color: #2563eb; }
+
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .sub { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+
+  label { display: block; font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+
+  input {
+    width: 100%;
+    padding: 11px 14px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    color: #f1f5f9;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .15s;
+    margin-bottom: 16px;
+  }
+  input:focus { border-color: #2563eb; }
+  input::placeholder { color: #475569; }
+
+  .otp-input {
+    letter-spacing: 8px;
+    font-size: 22px;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+  }
+  .btn:hover { background: #1d4ed8; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .error {
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.3);
+    color: #fca5a5;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .info {
+    background: rgba(37,99,235,.12);
+    border: 1px solid rgba(37,99,235,.3);
+    color: #93c5fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .back {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #64748b;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .back:hover { color: #94a3b8; }
+
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <span class="logo-badge">IR</span>
+    <span class="logo-name"><span>Img</span>Review</span>
+  </div>
+
+  <div id="error" class="error"></div>
+  <div id="info"  class="info"></div>
+
+  <!-- Step 1: senha -->
+  <div id="step1" class="step active">
+    <h1>Acesso seguro</h1>
+    <p class="sub">Digite sua senha para continuar</p>
+    <label for="password">Senha</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn" id="btnStep1" onclick="doStep1()">Continuar</button>
+  </div>
+
+  <!-- Step 2: código -->
+  <div id="step2" class="step">
+    <h1>Verificação</h1>
+    <p class="sub" id="step2sub">Enviamos um código de 6 dígitos para o seu email</p>
+    <label for="otp">Código</label>
+    <input type="text" id="otp" class="otp-input" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+    <button class="btn" id="btnStep2" onclick="doStep2()">Entrar</button>
+    <span class="back" onclick="backToStep1()">← Voltar</span>
+  </div>
+</div>
+
+<script>
+  let _token = "";
+
+  function showError(msg) {
+    const el = document.getElementById("error");
+    el.textContent = msg;
+    el.style.display = "block";
+    document.getElementById("info").style.display = "none";
+  }
+  function showInfo(msg) {
+    const el = document.getElementById("info");
+    el.textContent = msg;
+    el.style.display = "block";
+    document.getElementById("error").style.display = "none";
+  }
+  function clearMsgs() {
+    document.getElementById("error").style.display = "none";
+    document.getElementById("info").style.display  = "none";
+  }
+
+  document.getElementById("password").addEventListener("keydown", e => { if (e.key === "Enter") doStep1(); });
+  document.getElementById("otp").addEventListener("keydown", e => { if (e.key === "Enter") doStep2(); });
+
+  async function doStep1() {
+    clearMsgs();
+    const btn = document.getElementById("btnStep1");
+    const pw  = document.getElementById("password").value;
+    if (!pw) return showError("Digite a senha");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Enviando código...';
+    try {
+      const r = await fetch("/auth/step1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw }),
+      });
+      const d = await r.json();
+      if (!r.ok) { showError(d.error || "Erro"); return; }
+      _token = d.token;
+      document.getElementById("step1").classList.remove("active");
+      document.getElementById("step2").classList.add("active");
+      showInfo("Código enviado! Verifique seu email.");
+      setTimeout(() => document.getElementById("otp").focus(), 100);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Continuar";
+    }
+  }
+
+  async function doStep2() {
+    clearMsgs();
+    const btn = document.getElementById("btnStep2");
+    const otp = document.getElementById("otp").value.trim();
+    if (otp.length < 6) return showError("Digite o código de 6 dígitos");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Verificando...';
+    try {
+      const r = await fetch("/auth/step2", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: _token, otp }),
+      });
+      const d = await r.json();
+      if (!r.ok) { showError(d.error || "Erro"); return; }
+      localStorage.setItem("imgr_sid", d.sessionId);
+      window.location.href = "/";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Entrar";
+    }
+  }
+
+  function backToStep1() {
+    clearMsgs();
+    document.getElementById("step2").classList.remove("active");
+    document.getElementById("step1").classList.add("active");
+    document.getElementById("otp").value = "";
+    _token = "";
+  }
+
+  // If already authed, go home
+  const sid = localStorage.getItem("imgr_sid");
+  if (sid) {
+    fetch("/auth/check", { headers: { "x-session-id": sid } })
+      .then(r => r.json())
+      .then(d => { if (d.ok) window.location.href = "/"; });
+  }
+</script>
+</body>
+</html>

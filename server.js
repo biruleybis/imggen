@@ -5,6 +5,28 @@ const multer = require("multer");
 const { createCanvas, loadImage, GlobalFonts } = require("@napi-rs/canvas");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const crypto = require("crypto");
+const { Resend } = require("resend");
+
+// ── Auth config ───────────────────────────────────────────────────────────────
+const AUTH_PASSWORD   = process.env.AUTH_PASSWORD || "samara2024";
+const AUTH_EMAIL_TO   = process.env.AUTH_EMAIL    || "mentorbrunoribas@gmail.com";
+const AUTH_EMAIL_FROM = "ImgReview <noreply@ribasic.com.br>";
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// In-memory stores (ephemeral, resets on restart — acceptable for 2FA)
+const otpStore     = new Map(); // token → { otp, expires }
+const sessionStore = new Map(); // sessionId → expires
+
+function genToken() { return crypto.randomBytes(16).toString("hex"); }
+function genOtp()   { return String(Math.floor(100000 + Math.random() * 900000)); }
+
+function isAuthed(req) {
+  const sid = req.headers["x-session-id"] || req.query._sid;
+  if (!sid) return false;
+  const exp = sessionStore.get(sid);
+  return exp && Date.now() < exp;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,6 +75,78 @@ const renderLimiter = rateLimit({
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "2mb" }));
+
+// ── Auth routes (public — before static/auth guard) ───────────────────────────
+
+// Step 1: verify password → send OTP
+app.post("/auth/step1", rateLimit({ windowMs: 60000, max: 10 }), async (req, res) => {
+  const { password } = req.body || {};
+  if (password !== AUTH_PASSWORD) {
+    return res.status(401).json({ error: "Senha incorreta" });
+  }
+  const otp   = genOtp();
+  const token = genToken();
+  otpStore.set(token, { otp, expires: Date.now() + 10 * 60 * 1000 }); // 10 min
+
+  try {
+    await resend.emails.send({
+      from: AUTH_EMAIL_FROM,
+      to:   AUTH_EMAIL_TO,
+      subject: `ImgReview — código de acesso: ${otp}`,
+      html: `<p>Seu código de verificação é: <strong style="font-size:24px;letter-spacing:4px">${otp}</strong></p><p>Válido por 10 minutos.</p>`,
+    });
+  } catch (e) {
+    console.error("Resend error:", e.message);
+    return res.status(500).json({ error: "Erro ao enviar email" });
+  }
+
+  res.json({ token });
+});
+
+// Step 2: verify OTP → create session
+app.post("/auth/step2", rateLimit({ windowMs: 60000, max: 20 }), (req, res) => {
+  const { token, otp } = req.body || {};
+  const entry = otpStore.get(token);
+  if (!entry || Date.now() > entry.expires) {
+    return res.status(401).json({ error: "Código expirado" });
+  }
+  if (entry.otp !== String(otp).trim()) {
+    return res.status(401).json({ error: "Código incorreto" });
+  }
+  otpStore.delete(token);
+  const sid = genToken();
+  sessionStore.set(sid, Date.now() + 8 * 60 * 60 * 1000); // 8 hours
+  res.json({ sessionId: sid });
+});
+
+// Auth check endpoint
+app.get("/auth/check", (req, res) => {
+  res.json({ ok: isAuthed(req) });
+});
+
+// Serve login page (public)
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+// ── Auth guard middleware (applied AFTER auth routes) ─────────────────────────
+function authGuard(req, res, next) {
+  // Public: login page, auth endpoints, render endpoint (called by GHL with name)
+  if (req.path === "/login" || req.path.startsWith("/auth/") || req.path === "/render") {
+    return next();
+  }
+  if (!isAuthed(req)) {
+    // API calls → 401 JSON; page requests → redirect to login
+    if (req.path.startsWith("/api/") || req.headers["x-session-id"]) {
+      return res.status(401).json({ error: "Não autenticado" });
+    }
+    return res.redirect("/login");
+  }
+  next();
+}
+app.use(authGuard);
+
+// Static files (served after auth guard so index.html is protected)
 app.use(express.static(path.join(__dirname, "public")));
 
 // ── Storage: templates & icons ─────────────────────────────────────────────────

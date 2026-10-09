@@ -534,6 +534,27 @@ input[type="range"]::-webkit-slider-thumb {
 // ── Worker domain ─────────────────────────────────────────────────────────────
 const WORKER_DOMAIN = "imggen-worker.mentorbrunoribas.workers.dev";
 
+// ── Auth session ──────────────────────────────────────────────────────────────
+(function checkAuth() {
+  const sid = localStorage.getItem("imgr_sid");
+  if (!sid) { window.location.href = "/login"; return; }
+  fetch("/auth/check", { headers: { "x-session-id": sid } })
+    .then(r => r.json())
+    .then(d => { if (!d.ok) { localStorage.removeItem("imgr_sid"); window.location.href = "/login"; } });
+})();
+
+function authHeaders(extra) {
+  const sid = localStorage.getItem("imgr_sid") || "";
+  return Object.assign({ "x-session-id": sid }, extra);
+}
+function authFetch(url, opts = {}) {
+  opts.headers = authHeaders(opts.headers || {});
+  return fetch(url, opts).then(r => {
+    if (r.status === 401) { localStorage.removeItem("imgr_sid"); window.location.href = "/login"; }
+    return r;
+  });
+}
+
 // ── Font style definitions ────────────────────────────────────────────────────
 const FONT_STYLES = [
   { id: "great-vibes",      label: "Elegante Script",    family: "Great Vibes",        sizeMult: 1.4,  bold: false, italic: false, color: "#1a1a2e" },
@@ -883,7 +904,7 @@ function switchTab(tab) {
 
 // ── Template list ─────────────────────────────────────────────────────────────
 async function loadTemplates() {
-  const list = await fetch("/api/templates").then(r => r.json());
+  const list = await authFetch("/api/templates").then(r => r.json());
   const ul = document.getElementById("tplList");
   ul.innerHTML = "";
   list.forEach(t => ul.appendChild(buildTplItem(t)));
@@ -908,7 +929,7 @@ function buildTplItem({ slug, label }) {
 async function selectTemplate(slug) {
   currentSlug = slug;
   document.querySelectorAll(".tpl-item").forEach(el => el.classList.toggle("active", el.dataset.slug === slug));
-  const cfg = await fetch(`/api/templates/${slug}`).then(r => r.json());
+  const cfg = await authFetch(`/api/templates/${slug}`).then(r => r.json());
   loadConfig(cfg);
   loadPhoto(slug);
   updateURLs();
@@ -983,7 +1004,7 @@ async function uploadPhoto(input) {
   if (!currentSlug) return toast("Selecione ou crie um template primeiro", "error");
   const fd = new FormData();
   fd.append("photo", input.files[0]);
-  const res = await fetch(`/api/templates/${currentSlug}/photo`, { method: "POST", body: fd });
+  const res = await authFetch(`/api/templates/${currentSlug}/photo`, { method: "POST", body: fd });
   if (res.ok) {
     loadPhoto(currentSlug);
     refreshThumb(currentSlug);
@@ -1016,7 +1037,7 @@ async function saveTemplate() {
     text_y_pct:     textYPct,
   };
 
-  const res = await fetch(`/api/templates/${currentSlug}`, {
+  const res = await authFetch(`/api/templates/${currentSlug}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -1042,7 +1063,7 @@ function closeModal() {
 async function confirmNew() {
   const label = document.getElementById("newTplName").value.trim();
   if (!label) return;
-  const res  = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label }) });
+  const res  = await authFetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label }) });
   const data = await res.json();
   closeModal();
   await loadTemplates();
@@ -1051,7 +1072,7 @@ async function confirmNew() {
 }
 async function deleteTemplate(slug) {
   if (!confirm(`Excluir "${slug}"?`)) return;
-  await fetch(`/api/templates/${slug}`, { method: "DELETE" });
+  await authFetch(`/api/templates/${slug}`, { method: "DELETE" });
   if (currentSlug === slug) {
     currentSlug = null;
     document.getElementById("baseImg").style.display = "none";
