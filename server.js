@@ -20,9 +20,9 @@ async function connectMongo() {
   }
   try {
     const client = new MongoClient(MONGO_URI, {
-      tls: true,
-      tlsAllowInvalidCertificates: false,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000,
+      connectTimeoutMS: 15000,
+      socketTimeoutMS: 30000,
     });
     await client.connect();
     db = client.db("imggen");
