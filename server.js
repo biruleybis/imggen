@@ -7,7 +7,6 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 const { Resend } = require("resend");
-const sharp = require("sharp");
 
 // ── MongoDB driver ────────────────────────────────────────────────────────────
 const { MongoClient } = require("mongodb");
@@ -355,17 +354,8 @@ app.post("/api/templates/:slug/photo", upload.single("photo"), async (req, res) 
   const { slug } = req.params;
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  const rawBuffer = fs.readFileSync(req.file.path);
-  // Convert to JPEG regardless of input format (handles HEIC, WebP, PNG, etc.)
-  let fileBuffer, mime;
-  try {
-    fileBuffer = await sharp(rawBuffer).jpeg({ quality: 92 }).toBuffer();
-    mime = "image/jpeg";
-  } catch (convErr) {
-    console.warn("sharp conversion failed, using raw:", convErr.message);
-    fileBuffer = rawBuffer;
-    mime = req.file.mimetype || "image/jpeg";
-  }
+  const fileBuffer = fs.readFileSync(req.file.path);
+  const mime = req.file.mimetype || "image/jpeg";
   const photoBase64 = `data:${mime};base64,${fileBuffer.toString("base64")}`;
 
   try {
