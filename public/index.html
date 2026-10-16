@@ -383,6 +383,10 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
   <div class="template-list" id="tplList"></div>
   <div class="sidebar-foot">
+    <div id="statusBar" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-size:11px;color:var(--slate-3);">
+      <span id="statusDot" style="width:7px;height:7px;border-radius:50%;background:#64748b;display:inline-block;flex-shrink:0;"></span>
+      <span id="statusText">Verificando...</span>
+    </div>
     <div style="margin-bottom:8px;color:var(--slate-3);font-size:10px;">ImgReview v3.0 · Review Growth</div>
     <button class="btn-logout" onclick="logout()" title="Sair do sistema">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -954,6 +958,32 @@ function switchTab(tab) {
 }
 
 // ── Template list ─────────────────────────────────────────────────────────────
+// ── Status check ──────────────────────────────────────────────────────────────
+async function checkStatus() {
+  const dot  = document.getElementById("statusDot");
+  const text = document.getElementById("statusText");
+  try {
+    const start = Date.now();
+    const r = await fetch("/health", { cache: "no-store" });
+    const ms = Date.now() - start;
+    if (r.ok) {
+      dot.style.background  = "#22c55e";
+      dot.style.boxShadow   = "0 0 6px #22c55e88";
+      text.textContent = `Online · ${ms}ms`;
+    } else {
+      dot.style.background = "#f59e0b";
+      dot.style.boxShadow  = "none";
+      text.textContent = "Instável";
+    }
+  } catch {
+    dot.style.background = "#ef4444";
+    dot.style.boxShadow  = "none";
+    text.textContent = "Offline";
+  }
+}
+checkStatus();
+setInterval(checkStatus, 30000); // check every 30s
+
 async function loadTemplates() {
   const list = await authFetch("/api/templates").then(r => r.json());
   const ul = document.getElementById("tplList");
