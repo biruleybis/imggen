@@ -71,13 +71,37 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 .tpl-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .tpl-name { font-size: 12px; font-weight: 500; flex: 1; color: var(--slate-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tpl-del {
-  opacity: 0; width: 20px; height: 20px; border: none; background: none;
-  color: var(--danger); cursor: pointer; border-radius: 3px; font-size: 13px;
+  opacity: 0; width: 22px; height: 22px; border: none;
+  background: rgba(239,68,68,.15); color: #ef4444; cursor: pointer;
+  border-radius: 5px; font-size: 12px;
   display: flex; align-items: center; justify-content: center;
   transition: opacity var(--tr), background var(--tr); flex-shrink: 0;
 }
 .tpl-item:hover .tpl-del { opacity: 1; }
-.tpl-del:hover { background: rgba(239,68,68,.15); }
+.tpl-del:hover { background: rgba(239,68,68,.35); }
+
+/* ── Custom confirm modal ── */
+.confirm-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+  z-index: 9999; align-items: center; justify-content: center;
+}
+.confirm-overlay.open { display: flex; }
+.confirm-box {
+  background: #1e2130; border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+  padding: 28px 28px 22px; min-width: 300px; max-width: 380px; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.confirm-icon { font-size: 32px; margin-bottom: 12px; }
+.confirm-title { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+.confirm-msg { font-size: 13px; color: var(--slate-3); margin-bottom: 22px; line-height: 1.5; }
+.confirm-btns { display: flex; gap: 10px; justify-content: center; }
+.confirm-btns button { padding: 8px 22px; border-radius: 7px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+.confirm-btns .btn-cancel { background: rgba(255,255,255,.08); color: #cbd5e1; }
+.confirm-btns .btn-cancel:hover { background: rgba(255,255,255,.14); }
+.confirm-btns .btn-confirm-red { background: #ef4444; color: #fff; }
+.confirm-btns .btn-confirm-red:hover { background: #dc2626; }
+.confirm-btns .btn-confirm-blue { background: var(--blue); color: #fff; }
+.confirm-btns .btn-confirm-blue:hover { background: var(--blue-dk); }
 .sidebar-foot { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,.07); font-size: 10px; color: var(--slate-3); text-align: center; }
 .btn-logout { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 7px 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 6px; color: var(--slate-3); font-size: 11px; cursor: pointer; transition: background .15s, color .15s; }
 .btn-logout:hover { background: rgba(239,68,68,.12); color: #ef4444; border-color: rgba(239,68,68,.2); }
@@ -366,6 +390,19 @@ input[type="range"]::-webkit-slider-thumb {
     </button>
   </div>
 </aside>
+
+<!-- ── Custom confirm modal ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">🗑️</div>
+    <div class="confirm-title" id="confirmTitle">Confirmar exclusão</div>
+    <div class="confirm-msg" id="confirmMsg">Tem certeza?</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button id="confirmOkBtn" class="btn-confirm-red" onclick="confirmOk()">Confirmar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── Canvas ── -->
 <main class="canvas-area">
@@ -935,7 +972,7 @@ function buildTplItem({ slug, label }) {
       <img src="/template-image/${slug}?t=${Date.now()}" onerror="this.style.display='none'" alt="">
     </div>
     <span class="tpl-name">${label}</span>
-    <button class="tpl-del" title="Excluir" onclick="event.stopPropagation();deleteTemplate('${slug}')">&#x2715;</button>
+    <button class="tpl-del" title="Excluir" onclick="event.stopPropagation();deleteTemplate('${slug}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
   `;
   return div;
 }
@@ -1091,22 +1128,60 @@ async function confirmNew() {
   selectTemplate(data.slug);
   toast("Template criado", "success");
 }
+// ── Custom confirm dialog ─────────────────────────────────────────────────────
+let _confirmResolve = null;
+function showConfirm({ icon = "❓", title = "Confirmar", msg = "", btnClass = "btn-confirm-red", btnLabel = "Confirmar" }) {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById("confirmIcon").textContent = icon;
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmMsg").textContent = msg;
+    const btn = document.getElementById("confirmOkBtn");
+    btn.className = btnClass;
+    btn.textContent = btnLabel;
+    document.getElementById("confirmOverlay").classList.add("open");
+  });
+}
+function closeConfirm() {
+  document.getElementById("confirmOverlay").classList.remove("open");
+  if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+}
+function confirmOk() {
+  document.getElementById("confirmOverlay").classList.remove("open");
+  if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+}
+// close on overlay click
+document.getElementById("confirmOverlay").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeConfirm();
+});
+
 async function logout() {
-  if (!confirm("Deseja sair do sistema?")) return;
-  const sid = localStorage.getItem("imgreview_sid");
+  const ok = await showConfirm({
+    icon: "🚪",
+    title: "Sair do sistema",
+    msg: "Deseja encerrar sua sessão?",
+    btnClass: "btn-confirm-blue",
+    btnLabel: "Sair"
+  });
+  if (!ok) return;
+  const sid = localStorage.getItem("imgr_sid");
   if (sid) {
-    await fetch("/auth/logout", {
-      method: "POST",
-      headers: { "x-session-id": sid }
-    }).catch(() => {});
-    localStorage.removeItem("imgreview_sid");
-    localStorage.removeItem("imgreview_tok");
+    await fetch("/auth/logout", { method: "POST", headers: { "x-session-id": sid } }).catch(() => {});
+    localStorage.removeItem("imgr_sid");
   }
   window.location.href = "/login";
 }
 
 async function deleteTemplate(slug) {
-  if (!confirm(`Excluir "${slug}"?`)) return;
+  const label = document.querySelector(`.tpl-item[data-slug="${slug}"] .tpl-name`)?.textContent || slug;
+  const ok = await showConfirm({
+    icon: "🗑️",
+    title: "Excluir template",
+    msg: `Tem certeza que deseja excluir "${label}"? Esta ação não pode ser desfeita.`,
+    btnClass: "btn-confirm-red",
+    btnLabel: "Excluir"
+  });
+  if (!ok) return;
   await authFetch(`/api/templates/${slug}`, { method: "DELETE" });
   if (currentSlug === slug) {
     currentSlug = null;
@@ -1115,7 +1190,7 @@ async function deleteTemplate(slug) {
     document.getElementById("underlineSvg").classList.remove("visible");
     document.getElementById("emptyCanvas").style.display = "flex";
   }
-  toast("Excluido");
+  toast("Template excluído");
   loadTemplates();
 }
 
