@@ -150,6 +150,11 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 /* Canvas scroll + wrap */
 .canvas-scroll {
   flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 20px;
+  background-color: #0d1524;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 .canvas-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
 .canvas-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
