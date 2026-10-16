@@ -225,6 +225,12 @@ app.get("/auth/check", (req, res) => {
   res.json({ ok: isAuthed(req) });
 });
 
+app.post("/auth/logout", (req, res) => {
+  const sid = req.headers["x-session-id"];
+  if (sid) sessionStore.delete(sid);
+  res.json({ ok: true });
+});
+
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
