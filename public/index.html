@@ -68,8 +68,9 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; b
 .tpl-item:hover { background: rgba(255,255,255,.05); }
 .tpl-item.active { background: rgba(37,99,235,.18); }
 .tpl-item.active .tpl-name { color: var(--blue); }
-.tpl-thumb { width: 32px; height: 32px; border-radius: 5px; background: var(--navy-3); overflow: hidden; flex-shrink: 0; }
+.tpl-thumb { width: 40px; height: 40px; border-radius: 6px; background: var(--navy-3); overflow: hidden; flex-shrink: 0; display:flex; align-items:center; justify-content:center; }
 .tpl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.tpl-thumb .thumb-placeholder { color: rgba(255,255,255,.2); font-size: 16px; }
 .tpl-name { font-size: 12px; font-weight: 500; flex: 1; color: var(--slate-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tpl-del {
   opacity: 0; width: 22px; height: 22px; border: none;
@@ -374,7 +375,7 @@ input[type="range"]::-webkit-slider-thumb {
 <aside class="sidebar">
   <div class="sidebar-head">
     <div class="logo">
-      <img src="/logo-full.svg" alt="Review Growth" style="height:52px;width:auto;display:block;margin:0 auto;max-width:240px;">
+      <img src="/logo-full.svg" alt="Review Growth" style="height:60px;width:auto;display:block;margin:0 auto;max-width:230px;">
     </div>
     <button class="btn-new" onclick="openNewModal()">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -999,9 +1000,9 @@ function buildTplItem({ slug, label }) {
   div.onclick = () => selectTemplate(slug);
   div.innerHTML = `
     <div class="tpl-thumb" id="thumb-${slug}">
-      <img src="/template-image/${slug}?t=${Date.now()}" onerror="this.style.display='none'" alt="">
+      <img src="/template-image/${slug}?t=${Date.now()}" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\\'thumb-placeholder\\'>📷</span>'" alt="">
     </div>
-    <span class="tpl-name">${label}</span>
+    <span class="tpl-name" spellcheck="false">${label}</span>
     <button class="tpl-del" title="Excluir" onclick="event.stopPropagation();deleteTemplate('${slug}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
   `;
   return div;
